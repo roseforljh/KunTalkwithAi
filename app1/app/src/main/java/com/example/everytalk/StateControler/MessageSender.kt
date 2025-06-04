@@ -1,4 +1,4 @@
-package com.example.everytalk.StateControler // Package name kept as is, but should be lowercase
+package com.example.everytalk.StateControler
 
 import android.app.Application
 import android.content.ContentResolver
@@ -14,7 +14,7 @@ import android.util.Base64
 import android.util.Log
 import androidx.core.content.FileProvider
 import com.example.everytalk.data.DataClass.AbstractApiMessage
-import com.example.everytalk.data.DataClass.ApiContentPart // Will now use your defined Text, FileUri, InlineData
+import com.example.everytalk.data.DataClass.ApiContentPart
 import com.example.everytalk.data.DataClass.ChatRequest
 import com.example.everytalk.data.DataClass.PartsApiMessage
 import com.example.everytalk.data.DataClass.SimpleTextApiMessage
@@ -31,13 +31,13 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.ByteArrayOutputStream
-// import java.io.IOException // Potentially unused
+
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
 
-// import kotlinx.serialization.Contextual // Potentially unused
+
 
 class MessageSender(
     private val application: Application,
@@ -285,7 +285,7 @@ class MessageSender(
                                     index,
                                     originalFileNameForHint
                                 )
-                                // if (!bitmap.isRecycled) bitmap.recycle() // Careful with recycling
+
                             } else {
                                 Log.e(
                                     TAG_MESSAGE_SENDER,
@@ -381,7 +381,7 @@ class MessageSender(
                                         )?.use { inputStream ->
                                             val bytes = inputStream.readBytes()
                                             apiContentPartsForCurrentUserMessage.add(
-                                                // Using your ApiContentPart.InlineData structure
+
                                                 ApiContentPart.InlineData(
                                                     base64Data = Base64.encodeToString(
                                                         bytes,
@@ -399,10 +399,9 @@ class MessageSender(
                                             TAG_MESSAGE_SENDER,
                                             "Image $persistentUriStr ($fileSize bytes) too large for inline. Max: $MAX_IMAGE_SIZE_BYTES. Adding as FileUri."
                                         )
-                                        // Using your ApiContentPart.FileUri structure
-                                        // IMPORTANT: The 'uri' for FileUri should be a publicly accessible HTTP/S or GCS URI.
-                                        // A local FileProvider URI might not work directly with the Gemini API unless your backend handles it.
-                                        // For now, we'll pass the FileProvider URI, assuming a backend might process it.
+
+
+
                                         apiContentPartsForCurrentUserMessage.add(
                                             ApiContentPart.FileUri(
                                                 uri = persistentUriStr,
@@ -415,8 +414,8 @@ class MessageSender(
                                         )
                                     }
                                 } else if (processedItemForUi is SelectedMediaItem.GenericFile) {
-                                    // Using your ApiContentPart.FileUri structure
-                                    // IMPORTANT: Same as above, this local FileProvider URI might need backend processing.
+
+
                                     apiContentPartsForCurrentUserMessage.add(
                                         ApiContentPart.FileUri(
                                             uri = persistentUriStr,

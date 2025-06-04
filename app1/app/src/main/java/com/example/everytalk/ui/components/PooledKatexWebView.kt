@@ -18,15 +18,15 @@ import com.example.everytalk.webviewpool.WebViewConfig
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.util.concurrent.CancellationException // Ensure this is imported
+import java.util.concurrent.CancellationException
 
 @Composable
 fun PooledKatexWebView(
     appViewModel: AppViewModel,
     contentId: String,
-    initialLatexInput: String, // For the first full load
-    htmlChunkToAppend: Pair<String, String>?, // Key-Value Pair: <UniqueTriggerKey, HtmlChunkToAppend>
-    htmlTemplate: String, // The base HTML structure with JS functions
+    initialLatexInput: String,
+    htmlChunkToAppend: Pair<String, String>?,
+    htmlTemplate: String,
     modifier: Modifier = Modifier
 ) {
     val webViewTag = "PooledKatexWebView-$contentId"
@@ -50,7 +50,7 @@ fun PooledKatexWebView(
             WebViewConfig(
                 htmlTemplate,
                 ""
-            ) // Initial config.latexInput not critical for JS-driven rendering
+            )
         ) { acquiredWebView, success ->
             if (webViewInstance == acquiredWebView || webViewInstance == null) {
                 Log.d(webViewTag, "Pool: onPageFinished for $contentId. Success: $success.")
@@ -80,7 +80,7 @@ fun PooledKatexWebView(
         }
     }
 
-    // Effect for INITIAL FULL CONTENT rendering using initialLatexInput
+
     LaunchedEffect(
         webViewInstance,
         initialLatexInput,
@@ -118,15 +118,15 @@ fun PooledKatexWebView(
                 }
             }
         } else if (initialLatexInput.isBlank() && wv != null && isPageReadyForJs && isViewAttached && wv.parent != null && !initialContentRendered) {
-            // If initialLatexInput is blank (e.g. new streaming message), still call renderFullContent with empty string
-            // to set up the page and mark initial render "done" to allow appends.
+
+
             jsFullRenderJob?.cancel(CancellationException("New initial (empty) full render for $contentId"))
             jsFullRenderJob = coroutineScope.launch {
                 Log.i(
                     webViewTag,
                     "Performing INITIAL EMPTY RENDER for $contentId to enable appends."
                 )
-                val script = "renderFullContent(``);" // Render with empty string
+                val script = "renderFullContent(``);"
                 wv.evaluateJavascript(script) { result ->
                     Log.d(
                         webViewTag,
@@ -138,7 +138,7 @@ fun PooledKatexWebView(
         }
     }
 
-    // Effect for APPENDING HTML CHUNKS
+
     LaunchedEffect(
         webViewInstance,
         htmlChunkToAppend,
@@ -222,11 +222,11 @@ fun PooledKatexWebView(
                 )
                 isViewAttached = false
             },
-            modifier = modifier // Apply the modifier passed from AiMessageContent
+            modifier = modifier
         )
     } else {
         Log.d(webViewTag, "WebView for $contentId is NULL, showing Spacer.")
-        Spacer(modifier = modifier.heightIn(min = 1.dp)) // Use incoming modifier or a default
+        Spacer(modifier = modifier.heightIn(min = 1.dp))
     }
 
     val lifecycleOwner = LocalLifecycleOwner.current

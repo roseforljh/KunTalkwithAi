@@ -1,0 +1,14 @@
+./values/themes.xml
+./values/ic_launcher_background.xml
+./values/ids.xml
+./values/ktalk.xml
+./values/strings.xml
+./values/colors.xml
+./xml/file_paths.xml
+./xml/data_extraction_rules.xml
+./xml/network_security_config.xml
+./xml/backup_rules.xml
+./drawable/ic_launcher_foreground.xml
+./drawable/ic_launcher_background.xml
+./mipmap-anydpi-v26/ic_launcher.xml
+./mipmap-anydpi-v26/ic_launcher_round.xml

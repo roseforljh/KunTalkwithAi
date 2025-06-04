@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Path for temporary camera images (saved to context.filesDir/chat_images_temp/) -->
     <files-path name="chat_images_temp" path="chat_images_temp/" />
-
-    <!-- Path for persistent chat images (saved to context.filesDir/chat_images/) -->
     <files-path name="chat_images" path="chat_images/" />
-
-    <!-- Path for general chat attachments (saved to context.filesDir/chat_attachments/) -->
     <files-path name="my_chat_attachments" path="chat_attachments/" />
-
-    <!-- 如果你还在用外部存储，例如 getExternalFilesDir(null) -->
-    <!-- <external-files-path name="my_external_images" path="." /> -->
 </paths>

@@ -40,16 +40,16 @@ fun EmptyChatView(density: Density) {
             )
             Text("你好", style = style)
             val animY = remember { List(3) { Animatable(0f) } }
-            val coroutineScope = rememberCoroutineScope() // Needed for cancellation reset
+            val coroutineScope = rememberCoroutineScope()
 
             LaunchedEffect(Unit) {
-                animY.forEach { it.snapTo(0f) } // Initialize
+                animY.forEach { it.snapTo(0f) }
                 try {
-                    repeat(Int.MAX_VALUE) { // Loop indefinitely
+                    repeat(Int.MAX_VALUE) {
                         if (!isActive) throw CancellationException("你好动画取消")
                         animY.forEachIndexed { index, anim ->
                             launch {
-                                delay((index * 150L) % 450) // Staggered start
+                                delay((index * 150L) % 450)
                                 anim.animateTo(
                                     targetValue = with(density) { (-6).dp.toPx() },
                                     animationSpec = tween(
@@ -64,14 +64,14 @@ fun EmptyChatView(density: Density) {
                                         easing = FastOutSlowInEasing
                                     )
                                 )
-                                if (index == animY.lastIndex) delay(600) // Pause at the end of a full cycle
+                                if (index == animY.lastIndex) delay(600)
                             }
                         }
-                        delay(1200) // Wait for one full cycle of all dots to roughly complete + pause
+                        delay(1200)
                     }
                 } catch (e: CancellationException) {
                     Log.d("Animation", "你好动画已取消")
-                    // Ensure dots reset on cancellation
+
                     coroutineScope.launch { animY.forEach { launch { it.snapTo(0f) } } }
                 }
             }

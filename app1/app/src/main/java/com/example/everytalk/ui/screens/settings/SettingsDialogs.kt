@@ -1,4 +1,4 @@
-package com.example.everytalk.ui.screens.settings // 请确保包名与您的项目一致
+package com.example.everytalk.ui.screens.settings
 
 import android.util.Log
 import androidx.compose.animation.*
@@ -41,7 +41,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.everytalk.data.DataClass.ModalityType
 
-// 导入 Accompanist FlowRow
+
 import com.google.accompanist.flowlayout.FlowRow
 import com.google.accompanist.flowlayout.MainAxisAlignment
 
@@ -65,7 +65,7 @@ val DialogTextFieldColors
 val DialogShape = RoundedCornerShape(16.dp)
 
 
-// --- 选择模态类型的对话框 (FlowRow 版本) ---
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SelectModalityDialog(
@@ -213,11 +213,11 @@ private fun CustomStyledDropdownMenu(
         val density = LocalDensity.current
         val menuWidth = with(density) { anchorBounds.width.toDp() }
 
-        val yAdjustmentDp: Dp = 74.dp // Adjust this value if needed
+        val yAdjustmentDp: Dp = 74.dp
         val yAdjustmentInPx = with(density) { yAdjustmentDp.toPx() }.toInt()
         val yOffset = anchorBounds.bottom.toInt() - yAdjustmentInPx
 
-        val xAdjustmentDp: Dp = 24.dp // Adjust this value if needed
+        val xAdjustmentDp: Dp = 24.dp
         val xAdjustmentInPx = with(density) { xAdjustmentDp.toPx() }.toInt()
         val xOffset = anchorBounds.left.toInt() - xAdjustmentInPx
 

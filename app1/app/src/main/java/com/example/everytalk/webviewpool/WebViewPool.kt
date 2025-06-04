@@ -2,11 +2,11 @@ package com.example.everytalk.webviewpool
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent // 【新增】导入 Intent
-import android.net.Uri // 【新增】导入 Uri
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
 import android.view.ViewGroup
-import android.webkit.WebResourceRequest // 【新增】导入 WebResourceRequest (用于较新API级别)
+import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -18,7 +18,7 @@ data class WebViewConfig(val htmlTemplate: String, val latexInput: String)
 @SuppressLint("SetJavaScriptEnabled")
 class WebViewPool(
     private val applicationContext: Context,
-    private val maxSize: Int = 8 // 你之前用的是4，这里保持你代码中的值
+    private val maxSize: Int = 8
 ) {
     private val poolTag = "WebViewPool[${UUID.randomUUID().toString().take(4)}]"
     private val available = object : LinkedHashMap<String, WebView>(maxSize, 0.75f, true) {
@@ -45,7 +45,7 @@ class WebViewPool(
             settings.useWideViewPort = true
             settings.textZoom = 100
             setBackgroundColor(android.graphics.Color.TRANSPARENT)
-            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING // 尝试这个
+            settings.layoutAlgorithm = WebSettings.LayoutAlgorithm.TEXT_AUTOSIZING
         }
     }
 
@@ -61,7 +61,7 @@ class WebViewPool(
             Log.d(poolTag, "ACQUIRE: $contentId, New or Pool Size=${available.size}/${maxSize}")
             webView = createWebView()
             webView.loadDataWithBaseURL(
-                "file:///android_asset/", // 统一使用这个作为基础，以防模板中有相对路径的本地资源
+                "file:///android_asset/",
                 config.htmlTemplate,
                 "text/html",
                 "UTF-8",
@@ -71,7 +71,7 @@ class WebViewPool(
         inUse[contentId] = webView
         webView.tag = contentId
 
-        // 【修改】自定义 WebViewClient
+
         webView.webViewClient = object : WebViewClient() {
             private var hadError = false
 
@@ -94,7 +94,7 @@ class WebViewPool(
                 }
             }
 
-            // 【新增】处理URL加载行为
+
             @Deprecated("Use shouldOverrideUrlLoading(WebView, WebResourceRequest) for API 24+")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 return handleUrlLoading(url, view?.context)
@@ -111,27 +111,27 @@ class WebViewPool(
             private fun handleUrlLoading(url: String?, context: Context?): Boolean {
                 url?.let {
                     Log.d(poolTag, "WebView ($contentId) shouldOverrideUrlLoading: $it")
-                    // 检查是否是外部链接 (http, https)
+
                     if (it.startsWith("http://") || it.startsWith("https://")) {
-                        // 确保 context 非空
+
                         context?.let { ctx ->
                             try {
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(it))
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) // 如果从非Activity上下文启动，需要此标志
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                                 ctx.startActivity(intent)
                                 Log.i(poolTag, "Opening external link in browser: $it")
-                                return true // 表示我们已经处理了这个URL加载
+                                return true
                             } catch (e: Exception) {
                                 Log.e(poolTag, "Could not open external link: $it", e)
-                                // 可以给用户一个Toast提示无法打开链接
+
                             }
                         } ?: run {
                             Log.e(poolTag, "Context is null, cannot open external link: $it")
                         }
-                        return true // 即使无法打开，也消费掉这个事件，避免WebView自己加载
+                        return true
                     }
                 }
-                return false // 对于其他URL（例如，data: URL, file: URL, javascript: URL），让WebView默认处理
+                return false
             }
         }
 
@@ -145,10 +145,10 @@ class WebViewPool(
         return webView
     }
 
-    // 【新增】warmUp 方法 (如果还没有，从之前的回复中复制过来)
+
     @Synchronized
     fun warmUp(count: Int, baseHtmlTemplate: String) {
-        // ... (确保 warmUp 方法的实现是完整的) ...
+
         val currentTotal = available.size + inUse.size
         var needed = count - currentTotal
         if (needed < 0) needed = 0
@@ -193,15 +193,15 @@ class WebViewPool(
         if (inUse.remove(contentId) != null) {
             if (!available.containsKey(contentId)) {
                 webView.stopLoading()
-                // It's generally good practice to reset the WebViewClient when returning to pool,
-                // especially if the client holds references that might leak or cause issues.
-                // A new client is set in acquire anyway.
+
+
+
                 webView.webViewClient = WebViewClient()
                 (webView.parent as? ViewGroup)?.removeView(webView)
                 available[contentId] = webView
             }
         } else {
-            // If it was in use but not found (e.g. race condition or error), or never in use but release called.
+
             Log.w(poolTag, "Released WebView for $contentId was not in 'inUse' map. Destroying.")
             (webView.parent as? ViewGroup)?.removeView(webView)
             webView.destroy()

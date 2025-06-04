@@ -32,16 +32,16 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import com.example.everytalk.data.DataClass.Message // 假设 Message 和 FilteredConversationItem 在这里
-import com.example.everytalk.ui.screens.MainScreen.drawer.* // 导入抽屉子包下的所有内容
+import com.example.everytalk.data.DataClass.Message
+import com.example.everytalk.ui.screens.MainScreen.drawer.*
 import kotlinx.coroutines.delay
 
-// --- 常量定义 ---
+
 private val DEFAULT_DRAWER_WIDTH = 320.dp
 private const val EXPAND_ANIMATION_DURATION_MS = 200
 private const val CONTENT_CHANGE_ANIMATION_DURATION_MS = 200
 private val SEARCH_BACKGROUND_COLOR = Color(0xFFF0F0F0)
-private val LIST_ITEM_MIN_HEIGHT = 48.dp // <--- 控制历史列表项的最小高度
+private val LIST_ITEM_MIN_HEIGHT = 48.dp
 
 @OptIn(
     ExperimentalMaterial3Api::class,
@@ -68,7 +68,7 @@ fun AppDrawerContent(
     val selectedSet = remember { mutableStateListOf<Int>() }
     var showDeleteConfirm by remember { mutableStateOf(false) }
     var showClearAllConfirm by remember { mutableStateOf(false) }
-    var longPressPosition by remember { mutableStateOf<Offset?>(null) } // 长按位置，用于定位弹出菜单
+    var longPressPosition by remember { mutableStateOf<Offset?>(null) }
 
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -153,7 +153,7 @@ fun AppDrawerContent(
                 }
             }
 
-            // --- 搜索框区域 ---
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -226,7 +226,7 @@ fun AppDrawerContent(
                 )
             }
 
-            // --- “新建会话” 和 “清空记录” 按钮 ---
+
             Column {
                 Spacer(Modifier.height(8.dp))
                 Button(
@@ -237,8 +237,8 @@ fun AppDrawerContent(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White, // Or MaterialTheme.colorScheme.primaryContainer
-                        contentColor = Color.Black // Or MaterialTheme.colorScheme.onPrimaryContainer
+                        containerColor = Color.White,
+                        contentColor = Color.Black
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 0.dp,
@@ -257,12 +257,12 @@ fun AppDrawerContent(
                             Icons.Filled.AddCircleOutline,
                             "新建会话图标",
                             tint = Color.Black
-                        ) // Or MaterialTheme.colorScheme.onPrimaryContainer
+                        )
                         Spacer(Modifier.width(20.dp))
                         Text(
                             "新建会话",
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black, // Or MaterialTheme.colorScheme.onPrimaryContainer
+                            color = Color.Black,
                             fontSize = MaterialTheme.typography.bodyLarge.fontSize
                         )
                     }
@@ -276,8 +276,8 @@ fun AppDrawerContent(
                         .height(48.dp),
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White, // Or MaterialTheme.colorScheme.secondaryContainer
-                        contentColor = Color.Black // Or MaterialTheme.colorScheme.onSecondaryContainer
+                        containerColor = Color.White,
+                        contentColor = Color.Black
                     ),
                     elevation = ButtonDefaults.buttonElevation(
                         defaultElevation = 0.dp,
@@ -296,19 +296,19 @@ fun AppDrawerContent(
                             Icons.Filled.ClearAll,
                             "清空记录图标",
                             tint = Color.Black
-                        ) // Or MaterialTheme.colorScheme.onSecondaryContainer
+                        )
                         Spacer(Modifier.width(20.dp))
                         Text(
                             "清空记录",
                             fontWeight = FontWeight.Bold,
-                            color = Color.Black, // Or MaterialTheme.colorScheme.onSecondaryContainer
+                            color = Color.Black,
                             fontSize = MaterialTheme.typography.bodyLarge.fontSize
                         )
                     }
                 }
             }
 
-            // --- "聊天" 列表标题 ---
+
             Column {
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -319,7 +319,7 @@ fun AppDrawerContent(
                 )
             }
 
-            // --- 列表显示区域 ---
+
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     historicalConversations.isEmpty() -> {
@@ -350,11 +350,11 @@ fun AppDrawerContent(
                                 items = filteredItems,
                                 key = { item -> item.originalIndex }
                             ) { itemData ->
-                                // --- 用 Box 包裹并设置最小高度 ---
+
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .defaultMinSize(minHeight = LIST_ITEM_MIN_HEIGHT) // <--- 应用最小高度
+                                        .defaultMinSize(minHeight = LIST_ITEM_MIN_HEIGHT)
                                 ) {
                                     DrawerConversationListItem(
                                         itemData = itemData,
@@ -363,7 +363,7 @@ fun AppDrawerContent(
                                         loadedHistoryIndex = loadedHistoryIndex,
                                         getPreviewForIndex = getPreviewForIndex,
                                         onConversationClick = { index ->
-                                            selectedSet.clear() // 清空之前的选择
+                                            selectedSet.clear()
                                             onConversationClick(index)
                                         },
                                         onRenameRequest = { index ->
@@ -380,7 +380,7 @@ fun AppDrawerContent(
                                         onExpandItem = { index, position ->
                                             expandedItemIndex =
                                                 if (expandedItemIndex == index) null else index
-                                            if (expandedItemIndex != null) { // 只有当要展开时才记录位置
+                                            if (expandedItemIndex != null) {
                                                 longPressPosition = position
                                             }
                                         },
@@ -396,7 +396,7 @@ fun AppDrawerContent(
                 }
             }
 
-            // --- 对话框 ---
+
             DeleteConfirmationDialog(
                 showDialog = showDeleteConfirm,
                 selectedItemCount = selectedSet.size,
@@ -406,10 +406,10 @@ fun AppDrawerContent(
                 },
                 onConfirm = {
                     val indicesToDelete = selectedSet.toList()
-                    showDeleteConfirm = false // 关闭对话框
+                    showDeleteConfirm = false
                     selectedSet.clear()
-                    expandedItemIndex = null // 如果有菜单打开，也关闭它
-                    // 从后往前删除，避免索引错位
+                    expandedItemIndex = null
+
                     indicesToDelete.sortedDescending().forEach(onDeleteRequest)
                 }
             )
@@ -418,7 +418,7 @@ fun AppDrawerContent(
                 showDialog = showClearAllConfirm,
                 onDismiss = { showClearAllConfirm = false },
                 onConfirm = {
-                    showClearAllConfirm = false // 关闭对话框
+                    showClearAllConfirm = false
                     onClearAllConversationsRequest()
                     selectedSet.clear()
                     expandedItemIndex = null

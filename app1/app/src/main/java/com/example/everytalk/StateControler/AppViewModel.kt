@@ -1,4 +1,4 @@
-package com.example.everytalk.StateControler // 请确认包名
+package com.example.everytalk.StateControler
 
 import android.app.Application
 import android.net.Uri
@@ -14,9 +14,9 @@ import com.example.everytalk.data.DataClass.Sender
 import com.example.everytalk.data.DataClass.WebSearchResult
 import com.example.everytalk.data.local.SharedPreferencesDataSource
 import com.example.everytalk.data.network.ApiClient
-// --- 修改导入以使用新的 SelectedMediaItem ---
-import com.example.everytalk.model.SelectedMediaItem // <<< 修改这里的导入路径
-// --- 导入结束 ---
+
+import com.example.everytalk.model.SelectedMediaItem
+
 import com.example.everytalk.ui.screens.viewmodel.ConfigManager
 import com.example.everytalk.ui.screens.viewmodel.DataPersistenceManager
 import com.example.everytalk.ui.screens.viewmodel.HistoryManager
@@ -148,7 +148,7 @@ class AppViewModel(
 
     init {
         Log.d(TAG_APP_VIEW_MODEL, "ViewModel 初始化开始")
-        // ... (大部分 init 块保持不变) ...
+
         persistenceManager.loadInitialData { initialConfigPresent, initialHistoryPresent ->
             Log.d(
                 TAG_APP_VIEW_MODEL,
@@ -198,15 +198,15 @@ class AppViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             ApiClient.preWarm()
-            apiHandler // Ensure lazy init
-            configManager // Ensure lazy init
-            messageSender // Ensure lazy init
+            apiHandler
+            configManager
+            messageSender
             Log.d(
                 TAG_APP_VIEW_MODEL,
                 "ViewModel IO pre-warming of ApiClient and Handlers completed."
             )
         }
-        // ... (init 块的剩余部分) ...
+
         viewModelScope.launch(Dispatchers.Default) {
             Log.d(TAG_APP_VIEW_MODEL, "开始后台批量预处理历史消息的 htmlContent...")
             val originalLoadedHistory = stateHolder._historicalConversations.value.toList()
@@ -280,7 +280,7 @@ class AppViewModel(
         list1: List<Message>?,
         list2: List<Message>?
     ): Boolean {
-        // ... (实现保持不变) ...
+
         if (list1 == null && list2 == null) return true
         if (list1 == null || list2 == null) return false
         val filteredList1 = filterMessagesForComparison(list1)
@@ -297,7 +297,7 @@ class AppViewModel(
     }
 
     private fun filterMessagesForComparison(messagesToFilter: List<Message>): List<Message> {
-        // ... (实现保持不变) ...
+
         return messagesToFilter.filter { msg ->
             (msg.sender != Sender.System || msg.isPlaceholderName) &&
                     (msg.sender == Sender.User ||
@@ -313,7 +313,7 @@ class AppViewModel(
     }
 
     fun addProvider(providerName: String) {
-        // ... (实现保持不变) ...
+
         val trimmedName = providerName.trim()
         if (trimmedName.isNotBlank()) {
             viewModelScope.launch(Dispatchers.IO) {
@@ -360,17 +360,17 @@ class AppViewModel(
         stateHolder._text.value = newText
     }
 
-    // --- 修改 onSendMessage 方法以使用 List<SelectedMediaItem> ---
+
     fun onSendMessage(
         messageText: String,
         isFromRegeneration: Boolean = false,
-        attachments: List<SelectedMediaItem> = emptyList() // <<< 修改参数类型
+        attachments: List<SelectedMediaItem> = emptyList()
     ) {
-        // MessageSender 内部也需要相应地更新以处理 SelectedMediaItem
-        // 这里的 images 参数名可以改为 attachments 以更准确地反映其内容
+
+
         messageSender.sendMessage(messageText, isFromRegeneration, attachments)
     }
-    // --- 修改结束 ---
+
 
     fun onEditDialogTextChanged(newText: String) {
         stateHolder._editDialogInputText.value = newText
@@ -385,7 +385,7 @@ class AppViewModel(
     }
 
     fun confirmMessageEdit() {
-        // ... (实现保持不变) ...
+
         val messageIdToEdit = _editingMessageId.value ?: return
         val updatedText = stateHolder._editDialogInputText.value.trim()
         viewModelScope.launch {
@@ -414,7 +414,7 @@ class AppViewModel(
         stateHolder._editDialogInputText.value = ""
     }
 
-    // --- 修改 regenerateAiResponse 方法以处理 SelectedMediaItem ---
+
     fun regenerateAiResponse(originalUserMessage: Message) {
         if (originalUserMessage.sender != Sender.User) {
             showSnackbar("只能为您的消息重新生成回答"); return
@@ -426,20 +426,20 @@ class AppViewModel(
         val originalUserMessageText = originalUserMessage.text
         val originalUserMessageId = originalUserMessage.id
 
-        // 将 imageUrls (String) 转换为 SelectedMediaItem
+
         val originalAttachments = originalUserMessage.imageUrls?.mapNotNull { urlString ->
             try {
                 if (urlString.startsWith("content://") || urlString.startsWith("http://") || urlString.startsWith(
                         "https://"
                     )
                 ) {
-                    // 对于重新生成，我们只有URI，所以创建 ImageFromUri
-                    // 如果 Message 对象中存储了更多关于原始文件的信息（如文件名、MIME类型），
-                    // 那么可以创建更精确的 SelectedMediaItem.GenericFile
-                    // 这里简化为只处理图片URI
+
+
+
+
                     SelectedMediaItem.ImageFromUri(Uri.parse(urlString))
                 } else {
-                    null // 或者根据需要处理本地文件路径等
+                    null
                 }
             } catch (e: Exception) {
                 Log.w(TAG_APP_VIEW_MODEL, "无法解析重新生成消息中的图片URL: $urlString", e)
@@ -484,15 +484,15 @@ class AppViewModel(
                 stateHolder.messages.removeAt(userMessageIndex)
             }
             historyManager.saveCurrentChatToHistoryIfNeeded(forceSave = true)
-            // 调用更新后的 onSendMessage
-            onSendMessage( // 使用 this.onSendMessage 以明确
+
+            onSendMessage(
                 messageText = originalUserMessageText,
                 isFromRegeneration = true,
                 attachments = originalAttachments
             )
         }
     }
-    // --- 修改结束 ---
+
 
     fun triggerScrollToBottom() {
         viewModelScope.launch { stateHolder._scrollToBottomEvent.tryEmit(Unit) }
@@ -503,7 +503,7 @@ class AppViewModel(
     }
 
     fun startNewChat() {
-        // ... (实现保持不变) ...
+
         dismissEditDialog(); dismissSourcesDialog()
         apiHandler.cancelCurrentApiJob("开始新聊天")
         viewModelScope.launch {
@@ -517,7 +517,7 @@ class AppViewModel(
     }
 
     fun loadConversationFromHistory(index: Int) {
-        // ... (实现保持不变) ...
+
         val conversationList = stateHolder._historicalConversations.value
         if (index < 0 || index >= conversationList.size) {
             showSnackbar("无法加载对话：无效的索引"); return
@@ -566,7 +566,7 @@ class AppViewModel(
     }
 
     fun deleteConversation(indexToDelete: Int) {
-        // ... (实现保持不变) ...
+
         val currentLoadedIndex = stateHolder._loadedHistoryIndex.value
         if (indexToDelete < 0 || indexToDelete >= stateHolder._historicalConversations.value.size) {
             showSnackbar("无法删除：无效的索引"); return
@@ -597,7 +597,7 @@ class AppViewModel(
     }
 
     fun clearAllConversations() {
-        // ... (实现保持不变) ...
+
         dismissEditDialog(); dismissSourcesDialog()
         apiHandler.cancelCurrentApiJob("清除所有历史记录")
         viewModelScope.launch {
@@ -640,7 +640,7 @@ class AppViewModel(
     }
 
     fun getConversationPreviewText(index: Int): String {
-        // ... (实现保持不变) ...
+
         val conversation = stateHolder._historicalConversations.value.getOrNull(index)
             ?: return "对话 ${index + 1}"
         val placeholderTitleMsg =
@@ -660,7 +660,7 @@ class AppViewModel(
     }
 
     fun showRenameDialog(index: Int) {
-        // ... (实现保持不变) ...
+
         if (index >= 0 && index < stateHolder._historicalConversations.value.size) {
             _renamingIndexState.value = index
             val currentPreview = getConversationPreviewText(index)
@@ -681,7 +681,7 @@ class AppViewModel(
     }
 
     fun renameConversation(index: Int, newName: String) {
-        // ... (实现保持不变) ...
+
         val trimmedNewName = newName.trim()
         if (trimmedNewName.isBlank()) {
             showSnackbar("新名称不能为空"); return
@@ -747,7 +747,7 @@ class AppViewModel(
     }
 
     private fun onAiMessageFullTextChanged(messageId: String, currentFullText: String) {
-        // ... (实现保持不变) ...
+
         viewModelScope.launch(Dispatchers.Main.immediate) {
             val messageIndex = stateHolder.messages.indexOfFirst { it.id == messageId }
             if (messageIndex != -1) {
@@ -804,7 +804,7 @@ class AppViewModel(
     }
 
     override fun onCleared() {
-        // ... (实现保持不变) ...
+
         Log.d(TAG_APP_VIEW_MODEL, "onCleared 开始, 销毁 WebViewPool")
         try {
             webViewPool.destroyAll()

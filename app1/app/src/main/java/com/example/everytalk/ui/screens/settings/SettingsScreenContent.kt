@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.example.everytalk.data.DataClass.ApiConfig
 import com.example.everytalk.data.DataClass.ModalityType
 
-// maskApiKeyShort 函数保持不变
+
 
 @SuppressLint("ConfigurationScreenWidthHeight")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,7 +58,7 @@ internal fun SettingsScreenContent(
             onClick = onAddFullConfigClick,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 0.dp), // Usually no bottom padding for the first main button
+                .padding(bottom = 0.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,
                 contentColor = Color.White
@@ -123,7 +123,7 @@ private fun ApiKeyItemGroup(
 ) {
     var expandedModels by remember { mutableStateOf(false) }
     val providerName =
-        configsInGroup.firstOrNull()?.provider?.ifBlank { null } ?: "综合平台" // Provide a default
+        configsInGroup.firstOrNull()?.provider?.ifBlank { null } ?: "综合平台"
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -141,7 +141,7 @@ private fun ApiKeyItemGroup(
                         text = providerName,
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.onSurface // Use theme color
+                            color = MaterialTheme.colorScheme.onSurface
                         ),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -149,7 +149,7 @@ private fun ApiKeyItemGroup(
                     Text(
                         text = "Key: ${maskApiKey(apiKey)}",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurface // Use theme color
+                            color = MaterialTheme.colorScheme.onSurface
                         ),
                         modifier = Modifier.padding(top = 4.dp)
                     )
@@ -157,7 +157,7 @@ private fun ApiKeyItemGroup(
                 Badge(
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                    modifier = Modifier.padding(start = 8.dp) // Add some space
+                    modifier = Modifier.padding(start = 8.dp)
                 ) {
                     Text(
                         text = modalityType.displayName,
@@ -172,9 +172,9 @@ private fun ApiKeyItemGroup(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.small) // Clip for ripple effect
+                    .clip(MaterialTheme.shapes.small)
                     .clickable { expandedModels = !expandedModels }
-                    .padding(vertical = 8.dp), // Padding for clickable area
+                    .padding(vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
@@ -182,19 +182,19 @@ private fun ApiKeyItemGroup(
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Medium),
                     modifier = Modifier.weight(1f)
                 )
-                Row(verticalAlignment = Alignment.CenterVertically) { // To align icon and potentially text
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(
                         onClick = onAddModelForApiKeyClick,
-                        modifier = Modifier.size(36.dp) // Consistent clickable area
+                        modifier = Modifier.size(36.dp)
                     ) {
                         Icon(
                             Icons.Filled.Add,
                             contentDescription = "为此Key和类型添加模型",
-                            tint = Color.Gray // Or MaterialTheme.colorScheme.primary
+                            tint = Color.Gray
                         )
                     }
-                    // If you want text next to the icon:
-                    // Text("Add", style = MaterialTheme.typography.labelSmall, color = Color.Gray)
+
+
                 }
             }
 
@@ -233,7 +233,7 @@ private fun ApiKeyItemGroup(
                                         alpha = 0.1f
                                     ),
                                     modifier = Modifier.padding(
-                                        start = 40.dp, // Indent divider
+                                        start = 40.dp,
                                         end = 8.dp,
                                         top = 4.dp,
                                         bottom = 4.dp
@@ -256,7 +256,7 @@ private fun ModelItem(
     onDelete: () -> Unit
 ) {
     val itemBackgroundColor by animateColorAsState(
-        targetValue = if (isSelected) Color(0xFFF4F4F4) else Color.Transparent, // Light gray for selected
+        targetValue = if (isSelected) Color(0xFFF4F4F4) else Color.Transparent,
         animationSpec = if (isSelected) tween(durationMillis = 200) else snap(),
         label = "ModelItemBg"
     )
@@ -283,18 +283,18 @@ private fun ModelItem(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal,
-                color = Color.Black // Ensure text is visible on selected background
+                color = Color.Black
             )
         }
         IconButton(
             onClick = onDelete,
-            modifier = Modifier.size(36.dp) // Make delete icon consistently clickable
+            modifier = Modifier.size(36.dp)
         ) {
             Icon(
                 Icons.Filled.Delete,
                 contentDescription = "删除模型 ${config.name}",
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f), // Use theme error color
-                modifier = Modifier.size(18.dp) // Adjust icon size if needed
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
+                modifier = Modifier.size(18.dp)
             )
         }
     }

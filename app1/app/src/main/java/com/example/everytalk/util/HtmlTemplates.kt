@@ -1,4 +1,3 @@
-// file: com/example/everytalk/util/HtmlTemplates.kt
 package com.example.everytalk.util
 
 import android.util.Log

@@ -1,6 +1,6 @@
-package com.example.everytalk.StateControler // 确保这是你 MainActivity 的正确包名
+package com.example.everytalk.StateControler
 
-import android.app.Application // 【新增】导入 Application
+import android.app.Application
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -40,15 +40,15 @@ import com.example.everytalk.ui.theme.App1Theme
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-// ViewModel 工厂 (修改后)
+
 class AppViewModelFactory(
-    private val application: Application, // 【修改】接收 Application
+    private val application: Application,
     private val dataSource: SharedPreferencesDataSource
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(AppViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return AppViewModel(application, dataSource) as T // 【修改】调用新的构造函数
+            return AppViewModel(application, dataSource) as T
         }
         throw IllegalArgumentException("未知的 ViewModel 类: ${modelClass.name}")
     }
@@ -67,10 +67,10 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val coroutineScope = rememberCoroutineScope()
 
-                // 获取ViewModel实例
+
                 val appViewModel: AppViewModel = viewModel(
                     factory = AppViewModelFactory(
-                        application, // 【修改】传递 application 实例
+                        application,
                         SharedPreferencesDataSource(applicationContext)
                     )
                 )

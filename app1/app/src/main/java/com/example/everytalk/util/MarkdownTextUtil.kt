@@ -1,5 +1,4 @@
-// 确保这个文件顶部的包声明是正确的
-package com.example.everytalk.util // 确保与你的项目结构一致
+package com.example.everytalk.util
 
 import org.commonmark.parser.Parser
 import org.commonmark.renderer.text.TextContentRenderer

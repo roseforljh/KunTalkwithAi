@@ -134,14 +134,14 @@ internal fun convertMarkdownToHtml(originalMarkdown: String): String {
     val mathPattern = Pattern.compile(
         """(?<!\\)\\begin\{aligned\}(.*?)(?<!\\)\\end\{aligned\}|""" +
                 """(?<!\\)\\\((.*?)(?<!\\)\\\)|""" +
-                """(?<!\\)\$((?:[^$\s\\](?:\\.)*?))(?<!\\)\$|""" + // This already captures single $...$ if not greedy and not matching $$
+                """(?<!\\)\$((?:[^$\s\\](?:\\.)*?))(?<!\\)\$|""" +
                 """(?<!\\)\$\$(.*?)(?<!\\)\$\$|""" +
                 """(?<!\\)\\\[(.*?)(?<!\\)\\]""", Pattern.DOTALL
     )
 
-    // Pattern for the specific $...$ case shown in the image, ensuring it's not part of $$...$$
-    // It looks for a $ not preceded by \ or $, then captures content until another $ not preceded by \.
-    // The content itself should not contain a lone $ unless escaped.
+
+
+
     val specificSingleDollarPatternForVisitor =
         Pattern.compile("""(?<![\\\$])\$((?:[^\\\$]+|\\.)*?)(?<!\\)\$""")
 
@@ -173,10 +173,10 @@ internal fun convertMarkdownToHtml(originalMarkdown: String): String {
                     val singleDollarMatcher =
                         specificSingleDollarPatternForVisitor.matcher(remainingTextToSearch)
                     if (singleDollarMatcher.lookingAt()) {
-                        // Check if this match is actually a $$...$$ block by looking ahead
+
                         if (!(remainingTextToSearch.length > singleDollarMatcher.end() && remainingTextToSearch[singleDollarMatcher.end()] == '$')) {
                             val mathContent = singleDollarMatcher.group(1)
-                            if (mathContent != null) { // Ensure group 1 was captured
+                            if (mathContent != null) {
                                 targetNodeList.add(CMMathNode(mathContent.trim(), false))
                                 Log.d(
                                     tag,
@@ -190,7 +190,7 @@ internal fun convertMarkdownToHtml(originalMarkdown: String): String {
                         }
                     }
 
-                    if (consumedByMatch == 0) { // If not matched by specific single dollar or it was a $$
+                    if (consumedByMatch == 0) {
                         val fracMatcher =
                             specificBareFracPatternForVisitor.matcher(remainingTextToSearch)
                         if (fracMatcher.lookingAt()) {

@@ -129,7 +129,7 @@ class ApiHandler(
         @Suppress("UNUSED_PARAMETER") userMessageTextForContext: String,
         afterUserMessageId: String?,
         onMessagesProcessed: () -> Unit,
-        onRequestFailed: () -> Unit // <<< 关键改动：添加此参数
+        onRequestFailed: () -> Unit
     ) {
         val contextForLog = when (val lastUserMsg = requestBody.messages.lastOrNull {
             it.role == "user"
@@ -177,7 +177,7 @@ class ApiHandler(
                     .catch { e ->
                         if (e !is CancellationException) {
                             updateMessageWithError(aiMessageId, e)
-                            onRequestFailed() // 在捕获到非取消异常时调用
+                            onRequestFailed()
                         } else {
                             Log.d(
                                 TAG_API_HANDLER,
@@ -223,9 +223,9 @@ class ApiHandler(
                             if (cause == null || (cause !is CancellationException)) {
                                 historyManager.saveCurrentChatToHistoryIfNeeded(forceSave = cause != null)
                             } else if (cause != null && cause !is CancellationException) {
-                                // 如果 onCompletion 是因为 catch 块中的错误（非取消）导致的，
-                                // 那么 onRequestFailed 已经在 catch 中调用了。
-                                // historyManager.saveCurrentChatToHistoryIfNeeded 也在 updateMessageWithError 中。
+
+
+
                             }
                         }
 
@@ -246,7 +246,7 @@ class ApiHandler(
                                 if (stateHolder.messageAnimationStates[targetMsgId] != true) stateHolder.messageAnimationStates[targetMsgId] =
                                     true
                             } else if (cause != null && cause !is CancellationException && !msg.isError) {
-                                // updateMessageWithError 内部会处理保存
+
                             } else if (cause is CancellationException) {
                                 Log.d(
                                     TAG_API_HANDLER,
@@ -303,7 +303,7 @@ class ApiHandler(
                             e
                         )
                         updateMessageWithError(aiMessageId, e)
-                        onRequestFailed() // 在捕获到其他未处理异常时调用
+                        onRequestFailed()
                     }
                 }
             } finally {
@@ -419,7 +419,7 @@ class ApiHandler(
                     updateMessageWithError(
                         messageIdForLog,
                         IOException("SSE Error: ${appEvent.message} (Upstream: ${appEvent.upstreamStatus ?: "N/A"})")
-                        // onRequestFailed() 将在 updateMessageWithError -> catch 块中被间接调用
+
                     )
                 }
                 if (stateHolder.reasoningCompleteMap[messageIdForLog] != true) stateHolder.reasoningCompleteMap[messageIdForLog] =

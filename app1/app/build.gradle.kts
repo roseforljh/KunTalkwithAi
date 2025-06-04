@@ -1,6 +1,3 @@
-// app/build.gradle.kts
-
-// 用于解决 org.jetbrains:annotations 版本冲突 (如果需要)
 configurations.all {
     exclude(group = "org.jetbrains", module = "annotations-java5")
     exclude(group = "com.sun.activation", module = "javax.activation")
@@ -11,21 +8,21 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    // Kotlin Serialization 插件，版本与项目 Kotlin 版本一致
+
     id("org.jetbrains.kotlin.plugin.serialization") version libs.versions.kotlin.get()
-    // KSP 插件，版本与项目 Kotlin 版本 (2.0.0) 匹配
+
     id("com.google.devtools.ksp") version "2.0.0-1.0.21"
 }
 
 android {
-    namespace = "com.anyaitalked.everytalk" // 确认这是你的包名
-    compileSdk = 35 // 建议与 targetSdk 和 Compose BOM 推荐的 SDK 版本对齐
+    namespace = "com.anyaitalked.everytalk"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.anyaitalked.everytalk" // 确认这是你的 applicationId
+        applicationId = "com.anyaitalked.everytalk"
         minSdk = 27
-        //noinspection OldTargetApi
-        targetSdk = 35 // 通常与 compileSdk 一致
+
+        targetSdk = 35
         versionCode = 5946
         versionName = "1.25.0506"
 
@@ -37,7 +34,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // 生产环境通常建议开启
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -45,7 +42,7 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         debug {
-            isProfileable = false // debug 构建也可以设为 profileable，方便测试
+            isProfileable = false
         }
         create("benchmark") {
             initWith(buildTypes.getByName("release"))
@@ -72,7 +69,7 @@ android {
     }
     packaging{
         resources{
-            excludes += "/META-INF/{AL2.0,LGPL2.1}" // 排除 AL2.0 和 LGPL2.1 许可证文件
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
             pickFirsts += "META-INF/LICENSE-LGPL-3.txt"
             pickFirsts += "META-INF/DEPENDENCIES"
             pickFirsts+="META-INF/LICENSE-LGPL-2.1.txt"
@@ -83,42 +80,42 @@ android {
 
 
     dependencies {
-        // Compose BOM
-        implementation(platform("androidx.compose:compose-bom:2025.05.00")) // 使用你指定的版本
+
+        implementation(platform("androidx.compose:compose-bom:2025.05.00"))
         androidTestImplementation(platform("androidx.compose:compose-bom:2025.05.00"))
 
         implementation(platform("androidx.compose:compose-bom:2025.05.00"))
         androidTestImplementation(platform("androidx.compose:compose-bom:2025.05.00"))
 
-        // Compose UI - 让BOM管理版本
-        implementation(libs.androidx.ui) // 或者 "androidx.compose.ui:ui"
-        implementation(libs.androidx.ui.graphics) // 或者 "androidx.compose.ui:ui-graphics"
-        implementation(libs.androidx.ui.tooling.preview) // 或者 "androidx.compose.ui:ui-tooling-preview"
-        implementation(libs.androidx.material3) // 或者 "androidx.compose.material3:material3" <--- 移除版本号
 
-        implementation("androidx.compose.material:material-icons-core") // 这些通常也由BOM管理或有自己的稳定版本线
+        implementation(libs.androidx.ui)
+        implementation(libs.androidx.ui.graphics)
+        implementation(libs.androidx.ui.tooling.preview)
+        implementation(libs.androidx.material3)
+
+        implementation("androidx.compose.material:material-icons-core")
         implementation("androidx.compose.material:material-icons-extended")
-        implementation("androidx.compose.foundation:foundation") // BOM 会管理
-        implementation("androidx.compose.animation:animation")   // BOM 会管理
+        implementation("androidx.compose.foundation:foundation")
+        implementation("androidx.compose.animation:animation")
 
-        debugImplementation("androidx.compose.ui:ui-tooling") // BOM 会管理
+        debugImplementation("androidx.compose.ui:ui-tooling")
 
 
-        implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0") // 或使用 libs.androidx.lifecycle.viewmodel.compose
-        implementation("androidx.activity:activity-compose:1.10.1")         // 或使用 libs.androidx.activity.compose
+        implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.0")
+        implementation("androidx.activity:activity-compose:1.10.1")
 
-        // Core Android & Lifecycle (从你的 libs.versions.toml 获取，通常这些不由Compose BOM管理)
+
         implementation(libs.androidx.core.ktx)
         implementation(libs.androidx.lifecycle.runtime.ktx)
 
-        // Kotlinx Serialization
+
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
-        // Coroutines
+
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
 
-        // Ktor
+
         implementation("io.ktor:ktor-client-core:2.3.11")
         implementation("io.ktor:ktor-client-android:2.3.11")
         implementation("io.ktor:ktor-client-content-negotiation:2.3.11")
@@ -127,12 +124,12 @@ android {
         implementation("io.ktor:ktor-client-cio:2.3.11")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
-        // Testing
+
         testImplementation(libs.junit)
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
-        androidTestImplementation(libs.androidx.ui.test.junit4) // BOM 会管理版本
-        debugImplementation(libs.androidx.ui.test.manifest)    // BOM 会管理版本
+        androidTestImplementation(libs.androidx.ui.test.junit4)
+        debugImplementation(libs.androidx.ui.test.manifest)
 
         implementation("androidx.navigation:navigation-compose:2.7.7")
         implementation("com.halilibo.compose-richtext:richtext-ui-material3:0.20.0")
@@ -141,7 +138,7 @@ android {
         implementation(libs.androidx.profileinstaller)
         implementation ("org.slf4j:slf4j-nop:2.0.12")
 
-        implementation("org.commonmark:commonmark:0.24.0") // 请检查最新版本
+        implementation("org.commonmark:commonmark:0.24.0")
         implementation("org.commonmark:commonmark-ext-gfm-tables:0.24.0")
         implementation("org.commonmark:commonmark-ext-gfm-strikethrough:0.24.0")
         implementation("org.commonmark:commonmark-ext-autolink:0.24.0")

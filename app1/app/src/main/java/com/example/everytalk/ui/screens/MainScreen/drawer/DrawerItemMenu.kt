@@ -18,14 +18,9 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 
-/**
- * 对话列表项长按后显示的上下文菜单。
- * @param expanded 是否显示菜单。
- * @param onDismissRequest 当请求关闭菜单时调用 (例如点击外部或按返回键)。
- * @param onRenameClick 当点击“重命名”时调用。
- * @param onDeleteClick 当点击“删除”时调用。
- * @param popupPositionProvider 用于计算菜单位置的提供者。
- */
+
+
+
 @Composable
 internal fun ConversationItemMenu(
     expanded: Boolean,
@@ -33,19 +28,19 @@ internal fun ConversationItemMenu(
     onRenameClick: () -> Unit,
     onDeleteClick: () -> Unit,
     popupPositionProvider: PopupPositionProvider,
-    isRenameEnabled: Boolean = true // 默认重命名可用
+    isRenameEnabled: Boolean = true
 ) {
     if (expanded) {
         Popup(
             popupPositionProvider = popupPositionProvider,
             onDismissRequest = onDismissRequest,
-            properties = PopupProperties(focusable = false) // focusable=true 允许Popup通过返回键关闭
+            properties = PopupProperties(focusable = false)
         ) {
             Surface(
                 color = Color.White,
                 shadowElevation = 8.dp,
                 shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.widthIn(max = 120.dp) // 菜单宽度限制
+                modifier = Modifier.widthIn(max = 120.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(
@@ -53,7 +48,7 @@ internal fun ConversationItemMenu(
                         horizontal = 8.dp
                     )
                 ) {
-                    // 重命名选项
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -63,11 +58,11 @@ internal fun ConversationItemMenu(
                                 onClick = {
                                     if (isRenameEnabled) {
                                         onRenameClick()
-                                        onDismissRequest() // 操作后关闭菜单
+                                        onDismissRequest()
                                     }
                                 },
                                 interactionSource = remember { MutableInteractionSource() },
-                                indication = null // 移除默认涟漪
+                                indication = null
                             ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -84,8 +79,8 @@ internal fun ConversationItemMenu(
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
-                    Divider(color = Color.LightGray.copy(alpha = 0.5f)) // 分隔线
-                    // 删除选项
+                    Divider(color = Color.LightGray.copy(alpha = 0.5f))
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -93,7 +88,7 @@ internal fun ConversationItemMenu(
                             .clickable(
                                 onClick = {
                                     onDeleteClick()
-                                    onDismissRequest() // 操作后关闭菜单
+                                    onDismissRequest()
                                 },
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null

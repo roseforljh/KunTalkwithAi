@@ -49,9 +49,9 @@ import androidx.compose.ui.window.PopupProperties
 import androidx.core.content.FileProvider
 import coil3.compose.AsyncImage
 import com.example.everytalk.data.DataClass.ApiConfig
-import com.example.everytalk.model.ImageSourceOption // 确保你的 model 类在这里或正确导入
-import com.example.everytalk.model.MoreOptionsType   // 确保你的 model 类在这里或正确导入
-import com.example.everytalk.model.SelectedMediaItem // 确保你的 model 类在这里或正确导入
+import com.example.everytalk.model.ImageSourceOption
+import com.example.everytalk.model.MoreOptionsType
+import com.example.everytalk.model.SelectedMediaItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
@@ -292,7 +292,7 @@ fun ChatInputArea(
     val photoPickerLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             uri?.let { selectedMediaItems.add(SelectedMediaItem.ImageFromUri(it)) }
-            showImageSelectionPanel = false // Close panel after selection
+            showImageSelectionPanel = false
         }
     val cameraLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
@@ -303,7 +303,7 @@ fun ChatInputArea(
                 Log.w("CameraLauncher", "无法获取相机照片或 URI 为空")
                 tempCameraImageUri = null
             }
-            showImageSelectionPanel = false // Close panel
+            showImageSelectionPanel = false
         }
     val cameraPermissionLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -312,7 +312,7 @@ fun ChatInputArea(
                     newUri; cameraLauncher.launch(newUri)
             } else {
                 Log.w("CameraPermission", "相机权限被拒绝")
-                showImageSelectionPanel = false // Close panel
+                showImageSelectionPanel = false
             }
         }
 
@@ -324,7 +324,7 @@ fun ChatInputArea(
                 Log.d("OpenDocument", "Selected Document: $displayName, URI: $it, MIME: $mimeType")
                 selectedMediaItems.add(SelectedMediaItem.GenericFile(it, displayName, mimeType))
             } ?: Log.d("OpenDocument", "No document selected")
-            showMoreOptionsPanel = false // Close panel after selection
+            showMoreOptionsPanel = false
         }
     )
 
@@ -407,7 +407,7 @@ fun ChatInputArea(
                     }
                     Spacer(Modifier.width(8.dp))
                     IconButton(onClick = {
-                        // 切换面板前关闭另一个面板
+
                         if (showMoreOptionsPanel) showMoreOptionsPanel = false
                         showImageSelectionPanel = !showImageSelectionPanel
                     }) {
@@ -420,7 +420,7 @@ fun ChatInputArea(
                     }
                     Spacer(Modifier.width(8.dp))
                     IconButton(onClick = {
-                        // 切换面板前关闭另一个面板
+
                         if (showImageSelectionPanel) showImageSelectionPanel = false
                         showMoreOptionsPanel = !showMoreOptionsPanel
                     }) {
@@ -461,10 +461,10 @@ fun ChatInputArea(
                                 }
                             } else if (selectedApiConfig == null) {
                                 Log.w("SendMessage", "请先选择 API 配置")
-                                onShowSnackbar("请先选择 API 配置") // Added feedback
+                                onShowSnackbar("请先选择 API 配置")
                             } else {
                                 Log.w("SendMessage", "请输入消息内容或选择项目")
-                                onShowSnackbar("请输入消息内容或选择项目") // Added feedback
+                                onShowSnackbar("请输入消息内容或选择项目")
                             }
                         },
                         shape = CircleShape,
@@ -484,7 +484,7 @@ fun ChatInputArea(
         val yOffsetPx =
             -(chatInputContentHeightPx.toFloat() + with(density) { panelVerticalMarginFromTopInput.toPx() })
 
-        // 图片选择面板
+
         if (showImageSelectionPanel) {
             val xOffsetPx = with(density) { 8.dp.toPx() }
             Popup(
@@ -492,7 +492,7 @@ fun ChatInputArea(
                 offset = IntOffset(xOffsetPx.toInt(), yOffsetPx.toInt()),
                 onDismissRequest = { showImageSelectionPanel = false },
                 properties = PopupProperties(
-                    focusable = false, // MODIFIED: Prevent popup from taking focus
+                    focusable = false,
                     dismissOnClickOutside = true,
                     dismissOnBackPress = true
                 )
@@ -516,7 +516,7 @@ fun ChatInputArea(
             }
         }
 
-        // 更多选项面板
+
         if (showMoreOptionsPanel) {
             val iconButtonApproxWidth = 48.dp
             val spacerWidth = 8.dp
@@ -531,7 +531,7 @@ fun ChatInputArea(
                 offset = IntOffset(xOffsetForMoreOptionsPanelPx.toInt(), yOffsetPx.toInt()),
                 onDismissRequest = { showMoreOptionsPanel = false },
                 properties = PopupProperties(
-                    focusable = false, // MODIFIED: Prevent popup from taking focus
+                    focusable = false,
                     dismissOnClickOutside = true,
                     dismissOnBackPress = true
                 )

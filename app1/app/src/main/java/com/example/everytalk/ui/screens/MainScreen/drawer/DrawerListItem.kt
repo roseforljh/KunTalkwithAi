@@ -34,7 +34,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-private val LIST_ITEM_MIN_HEIGHT = 64.dp // 更高的行高，按需调整
+private val LIST_ITEM_MIN_HEIGHT = 64.dp
 
 @Composable
 internal fun DrawerConversationListItem(
@@ -65,7 +65,7 @@ internal fun DrawerConversationListItem(
 
     val isActuallyActive = loadedHistoryIndex == originalIndex
 
-    // 自定义涟漪效果相关状态
+
     var rippleState by remember { mutableStateOf<CustomRippleState>(CustomRippleState.Idle) }
     var currentPressPosition by remember { mutableStateOf(Offset.Zero) }
     val animationProgress by animateFloatAsState(
@@ -87,7 +87,7 @@ internal fun DrawerConversationListItem(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(LIST_ITEM_MIN_HEIGHT) // ★ 保证点击区域更高，涟漪也会变高
+            .height(LIST_ITEM_MIN_HEIGHT)
             .clipToBounds()
             .pointerInput(originalIndex) {
                 detectTapGestures(
@@ -147,7 +147,7 @@ internal fun DrawerConversationListItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(LIST_ITEM_MIN_HEIGHT),
-                verticalAlignment = Alignment.CenterVertically // 文字竖直居中
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 if (isActuallyActive) {
                     Spacer(Modifier.width(16.dp))
@@ -183,7 +183,7 @@ internal fun DrawerConversationListItem(
                 )
             }
 
-            // 菜单
+
             val currentLongPressPosition = longPressPositionForMenu
             if (expandedItemIndex == originalIndex && currentLongPressPosition != null) {
                 ConversationItemMenu(

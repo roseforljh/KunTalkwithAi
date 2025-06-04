@@ -46,12 +46,12 @@ fun ChatMessagesList(
         items(items = messages, key = { message -> message.id }) { message ->
             val isLoadingMessage = message.id == currentStreamingAiMessageId && isApiCalling
 
-            // Capture mutable property in a local val
+
             val currentReasoning = message.reasoning
 
             val showLoadingDots = isLoadingMessage &&
                     message.text.isBlank() &&
-                    // Use the local val for the check
+
                     (currentReasoning == null || currentReasoning.isBlank()) &&
                     !message.contentStarted &&
                     !message.isError
@@ -63,7 +63,7 @@ fun ChatMessagesList(
                 onUserInteraction = onUserInteraction,
                 isMainContentStreaming = isLoadingMessage && message.contentStarted,
                 isReasoningStreaming = isLoadingMessage && currentReasoning != null && !currentReasoning.isBlank() && !(reasoningCompleteMap[message.id]
-                    ?: false), // Also use currentReasoning here
+                    ?: false),
                 isReasoningComplete = (reasoningCompleteMap[message.id] ?: false),
                 maxWidth = bubbleMaxWidth,
                 showLoadingBubble = showLoadingDots,

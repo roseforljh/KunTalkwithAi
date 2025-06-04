@@ -1,4 +1,4 @@
-package com.example.everytalk.ui.screens.MainScreen.chat // 建议修改为 com.example.everytalk.ui.screens.mainscreen.chat
+package com.example.everytalk.ui.screens.MainScreen.chat
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -44,12 +44,12 @@ fun ModelSelectionBottomSheet(
         dragHandle = null
     ) {
         Column(modifier = Modifier.padding(bottom = 12.dp)) {
-            // 标题部分
+
             Row(
                 modifier = Modifier.padding(
                     start = 16.dp,
                     end = 16.dp,
-                    top = 36.dp, // 加大与顶部的距离
+                    top = 36.dp,
                     bottom = 8.dp
                 ),
                 verticalAlignment = Alignment.CenterVertically
@@ -67,7 +67,7 @@ fun ModelSelectionBottomSheet(
                 )
             }
 
-            // 列表部分
+
             if (availableModels.isEmpty()) {
                 Text(
                     "没有可用的模型配置。",
@@ -78,15 +78,15 @@ fun ModelSelectionBottomSheet(
                 )
             } else {
                 LazyColumn(
-                    contentPadding = PaddingValues(vertical = 0.dp) // 列表本身的垂直内边距设为0，使列表项更紧凑
+                    contentPadding = PaddingValues(vertical = 0.dp)
                 ) {
                     items(items = availableModels, key = { it.id }) { modelConfig ->
                         ListItem(
                             headlineContent = {
                                 Text(
                                     text = modelConfig.name.ifEmpty { modelConfig.model },
-                                    fontSize = 14.sp, // 较小的模型名称字体
-                                    color = Color(0xff778899)  // 模型名称颜色为灰色
+                                    fontSize = 14.sp,
+                                    color = Color(0xff778899)
                                 )
                             },
                             supportingContent = {
@@ -94,7 +94,7 @@ fun ModelSelectionBottomSheet(
                                     Text(
                                         modelConfig.model,
                                         style = MaterialTheme.typography.bodySmall,
-                                        fontSize = 11.sp, // supporting text 字体
+                                        fontSize = 11.sp,
                                         color = Color.DarkGray
                                     )
                                 }
@@ -105,17 +105,17 @@ fun ModelSelectionBottomSheet(
                                         Icons.Filled.Done,
                                         contentDescription = "当前选中",
                                         tint = Color(0xff778899),
-                                        modifier = Modifier.size(20.dp) // 较小的勾选图标
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 } else {
-                                    Spacer(Modifier.size(20.dp)) // 保持对齐的占位符
+                                    Spacer(Modifier.size(20.dp))
                                 }
                             },
                             modifier = Modifier.clickable {
                                 onModelSelected(modelConfig)
                             },
                             colors = ListItemDefaults.colors(
-                                containerColor = Color.Transparent // 保持背景透明
+                                containerColor = Color.Transparent
                             )
                         )
                     }

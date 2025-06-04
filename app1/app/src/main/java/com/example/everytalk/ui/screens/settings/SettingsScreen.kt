@@ -35,7 +35,7 @@ fun SettingsScreen(
             .filterValues { it.isNotEmpty() }
     }
 
-    // --- 对话框状态 ---
+
     var showSelectModalityDialog by remember { mutableStateOf(false) }
     var selectedModalityForNewConfig by remember { mutableStateOf<ModalityType?>(null) }
 
@@ -48,7 +48,7 @@ fun SettingsScreen(
 
     var showAddModelToKeyDialog by remember { mutableStateOf(false) }
     var addModelToKeyTargetApiKey by remember { mutableStateOf("") }
-    var addModelToKeyTargetProvider by remember { mutableStateOf("") } // Corrected typo from mutableStateOF
+    var addModelToKeyTargetProvider by remember { mutableStateOf("") }
     var addModelToKeyTargetAddress by remember { mutableStateOf("") }
     var addModelToKeyTargetModality by remember { mutableStateOf(ModalityType.TEXT) }
     var addModelToKeyNewModelName by remember { mutableStateOf("") }
@@ -110,9 +110,9 @@ fun SettingsScreen(
         )
     }
 
-    // --- 对话框链 ---
 
-    // 1. 选择模态类型对话框
+
+
     if (showSelectModalityDialog) {
         SelectModalityDialog(
             onDismissRequest = { showSelectModalityDialog = false },
@@ -127,7 +127,7 @@ fun SettingsScreen(
                 val providerKey = defaultProvider.lowercase().trim()
                 newFullConfigAddress = if (modality == ModalityType.TEXT) {
                     defaultApiAddresses[providerKey] ?: ""
-                } else if (providerKey == "google" && modality == ModalityType.MULTIMODAL) { // Corrected enum constant
+                } else if (providerKey == "google" && modality == ModalityType.MULTIMODAL) {
                     defaultApiAddresses["google"] ?: ""
                 } else {
                     ""
@@ -138,7 +138,7 @@ fun SettingsScreen(
     }
 
 
-    // 2. 添加完整配置对话框 (Provider, Address, Key)
+
     if (showAddFullConfigDialog && selectedModalityForNewConfig != null) {
         AddNewFullConfigDialog(
             provider = newFullConfigProvider,
@@ -149,7 +149,7 @@ fun SettingsScreen(
 
                 newFullConfigAddress = if (currentModality == ModalityType.TEXT) {
                     defaultApiAddresses[providerKey] ?: ""
-                } else if (providerKey == "google" && currentModality == ModalityType.MULTIMODAL) { // Corrected enum constant
+                } else if (providerKey == "google" && currentModality == ModalityType.MULTIMODAL) {
                     defaultApiAddresses["google"] ?: ""
                 } else {
                     ""
@@ -179,7 +179,7 @@ fun SettingsScreen(
         )
     }
 
-    // 3. 为Key添加模型对话框
+
     if (showAddModelToKeyDialog) {
         AddModelToExistingKeyDialog(
             targetProvider = addModelToKeyTargetProvider,
@@ -209,7 +209,7 @@ fun SettingsScreen(
         )
     }
 
-    // 添加自定义Provider的对话框
+
     if (showAddCustomProviderDialog) {
         AddProviderDialog(
             newProviderName = newCustomProviderNameInput,
@@ -233,7 +233,7 @@ fun SettingsScreen(
                         if (currentModality != null) {
                             newFullConfigAddress = if (currentModality == ModalityType.TEXT) {
                                 defaultApiAddresses[providerKey] ?: ""
-                            } else if (providerKey == "google" && currentModality == ModalityType.MULTIMODAL) { // Corrected enum constant
+                            } else if (providerKey == "google" && currentModality == ModalityType.MULTIMODAL) {
                                 defaultApiAddresses["google"] ?: ""
                             } else {
                                 ""
