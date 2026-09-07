@@ -396,6 +396,7 @@ internal fun MarkdownSingleAutolinkLogoParagraph(
                 LocalMarkdownAnnotator provides logoFreeAnnotator,
             ) {
                 MarkdownParagraph(
+                    annotatorSettings = markdownAnnotatorSettingsWithRegularStrongWeight(),
                     content = content,
                     node = node,
                     style = style,

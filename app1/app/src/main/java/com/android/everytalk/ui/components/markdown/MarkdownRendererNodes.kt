@@ -85,6 +85,7 @@ import androidx.compose.ui.semantics.CollectionInfo
 import androidx.compose.ui.semantics.collectionInfo
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.platform.testTag
 import com.android.everytalk.data.DataClass.Sender
 import com.android.everytalk.ui.components.ChatMarkdownTextStyle
@@ -132,6 +133,7 @@ import com.mikepenz.markdown.compose.elements.MarkdownCodeBlock
 import com.mikepenz.markdown.compose.elements.MarkdownCodeFence
 import com.mikepenz.markdown.compose.elements.MarkdownDivider
 import com.mikepenz.markdown.compose.elements.MarkdownHeader
+import com.mikepenz.markdown.compose.elements.MarkdownText
 import com.mikepenz.markdown.compose.elements.MarkdownListItems
 import com.mikepenz.markdown.compose.elements.MarkdownOrderedList
 import com.mikepenz.markdown.compose.elements.MarkdownParagraph
@@ -520,10 +522,12 @@ internal fun FootnoteMarkdownHeader(
         navigation = navigation,
     ) { targetModifier ->
         Box(modifier = targetModifier) {
-            MarkdownHeader(
+            MarkdownText(
                 content = model.content,
                 node = model.node,
                 style = style,
+                modifier = Modifier.semantics { heading() },
+                annotatorSettings = markdownAnnotatorSettingsWithRegularStrongWeight(),
                 contentChildType = contentChildType,
             )
         }
@@ -733,7 +737,7 @@ private object RegularMarkdownStrongSpanPainter : ExtendedSpanPainter() {
 }
 
 internal fun createRegularMarkdownStrongExtendedSpans(): ExtendedSpans =
-    ExtendedSpans(RegularMarkdownStrongSpanPainter)
+    ExtendedSpans(RegularMarkdownStrongSpanPainter, MarkdownDottedLinkPainter)
 
 @Composable
 internal fun markdownExtendedSpansWithRegularStrongWeight(): MarkdownExtendedSpans =
@@ -755,7 +759,8 @@ private class RegularMarkdownStrongAnnotatorSettings(
             )
             true
         } else {
-            delegate.annotator.annotate?.invoke(this, content, child) ?: false
+            val consumed = delegate.annotator.annotate?.invoke(this, content, child) ?: false
+            consumed || appendStyledMarkdownLink(content, child, this@RegularMarkdownStrongAnnotatorSettings)
         }
     }
 }

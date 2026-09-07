@@ -281,11 +281,6 @@ fun MikePenzMarkdownRenderer(
         lineHeight = ChatMarkdownTextStyle.BODY_LINE_HEIGHT_SP.sp,
         fontWeight = FontWeight.Normal,
     )
-    val markdownLinkColor = if (MaterialTheme.colorScheme.background.luminance() < 0.5f) {
-        MARKDOWN_LINK_DARK_COLOR
-    } else {
-        MARKDOWN_LINK_LIGHT_COLOR
-    }
     val flatDarkStyle = sender == Sender.AI && MaterialTheme.colorScheme.background.luminance() < 0.5f
     val typography = markdownTypography(
         h1 = bodyStyle.copy(
@@ -332,8 +327,7 @@ fun MikePenzMarkdownRenderer(
         ),
         textLink = TextLinkStyles(
             style = SpanStyle(
-                color = markdownLinkColor,
-                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface,
                 textDecoration = TextDecoration.None,
             )
         ),
@@ -538,6 +532,7 @@ fun MikePenzMarkdownRenderer(
                                 baseStyle = model.typography.paragraph,
                             )
                             MarkdownParagraph(
+                                annotatorSettings = markdownAnnotatorSettingsWithRegularStrongWeight(),
                                 content = model.content,
                                 node = model.node,
                                 modifier = targetModifier,
