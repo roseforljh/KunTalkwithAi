@@ -106,12 +106,12 @@ class MikePenzMarkdownRendererTest {
             annotatorSettings = settings,
         )
 
-        assertEquals("重点 链接", rendered.text)
+        assertEquals("重点 链接\u00a0↗", rendered.text)
         assertFalse(rendered.spanStyles.any { it.item.fontWeight == FontWeight.Bold })
         assertTrue(rendered.spanStyles.any { it.item.fontWeight == FontWeight.Medium })
         assertEquals(
             link,
-            (rendered.getLinkAnnotations(0, rendered.length).single().item as LinkAnnotation.Url).url,
+            rendered.getLinkAnnotations(0, rendered.length).map { (it.item as LinkAnnotation.Url).url }.distinct().single(),
         )
     }
 
