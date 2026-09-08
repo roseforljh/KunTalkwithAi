@@ -99,6 +99,8 @@ data class CapabilityRequest(
     val requestedCapability: String,
     val reasonSafe: String,
     val userVisibleContext: String? = null,
+    /** 受保护 capability 的非敏感参数；绝不存放 Secret 正文。 */
+    val parameters: Map<String, String> = emptyMap(),
 )
 
 @Serializable
@@ -197,6 +199,7 @@ data class TrustedInterventionRequest(
     val capabilityId: String,
     val reasonSafe: String,
     val userVisibleContext: String? = null,
+    val parameters: Map<String, String> = emptyMap(),
     val targetBindingRef: String,
     val requestSource: String,
     val policyVersion: String,

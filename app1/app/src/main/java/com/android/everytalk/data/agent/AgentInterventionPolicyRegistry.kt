@@ -68,6 +68,12 @@ class AgentInterventionPolicyRegistry {
             listOf(Field("authorization", "OpenAI API Key", FieldKind.AUTHORIZATION_SECRET)),
             "ADAPTER_TARGET",
         ),
+        "server.env.secret" to Policy(
+            "server.env.secret", "1", "1", AgentContinuationKind.RESUME_AGENT_LOOP,
+            ResolutionMaterialKind.EPHEMERAL, "workspace-secret-adapter",
+            listOf(Field("secret", "服务器环境变量值", FieldKind.SENSITIVE_TEXT)),
+            "ADAPTER_TARGET",
+        ),
     )
 
     fun resolve(capability: String): Policy? = policies[capability]

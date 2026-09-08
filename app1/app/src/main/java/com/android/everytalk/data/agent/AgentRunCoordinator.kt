@@ -117,6 +117,9 @@ class AgentRunCoordinator(
             interventionCredentialStore,
         )
     }
+    private val computerRepository by lazy {
+        com.android.everytalk.data.computer.ComputerRepository(appContext)
+    }
     private val interventionAdapterRegistry by lazy {
         AgentInterventionAdapterRegistry(
             mapOf(
@@ -129,6 +132,12 @@ class AgentRunCoordinator(
                     "openai",
                     interventionStoredAuthorizationStore,
                     interventionCredentialStore,
+                ),
+                "workspace-secret-adapter" to WorkspaceSecretCapabilityAdapter(
+                    com.android.everytalk.data.computer.ComputerWorkspaceSecretManager(
+                        computerRepository,
+                    ),
+                    computerRepository,
                 ),
             ),
         )

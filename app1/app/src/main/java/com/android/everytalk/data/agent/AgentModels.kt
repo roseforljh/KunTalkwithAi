@@ -203,12 +203,35 @@ sealed class AgentPauseRequest {
         val reason: String,
     ) : AgentPauseRequest()
 
+    /**
+     * 通用受保护 Secret 请求。
+     * scope 只描述用途，不包含 Secret 正文；正文始终由可信 UI 写入本地受保护存储。
+     */
+    @Serializable
+    @SerialName("protected_secret")
+    data class ProtectedSecret(
+        val scope: SecretScope,
+        val targetId: String?,
+        val name: String,
+        val path: String? = null,
+        val reason: String,
+    ) : AgentPauseRequest()
+
     /** 新统一协议入口。旧 EnableAgent / SkillSecret 只保留兼容映射。 */
     @Serializable
     @SerialName("capability")
     data class Capability(
         val request: CapabilityRequest,
     ) : AgentPauseRequest()
+}
+
+@Serializable
+enum class SecretScope {
+    SKILL,
+    WORKSPACE,
+    SERVER_ENV,
+    SSH,
+    SUDO,
 }
 
 data class PendingAgentEnableApproval(
@@ -227,6 +250,8 @@ data class PendingSkillSecretApproval(
     val skillName: String,
     val name: String,
     val reason: String,
+    val scope: SecretScope = SecretScope.SKILL,
+    val targetId: String? = null,
 )
 
 /** 工具真正进入 Executor 前立即落库，重启时据此判断是否可能已经产生外部副作用。 */

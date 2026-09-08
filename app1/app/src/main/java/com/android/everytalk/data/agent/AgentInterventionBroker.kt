@@ -295,6 +295,7 @@ class AgentInterventionBroker(
                 capabilityId = policy.capability,
                 reasonSafe = capabilityRequest.reasonSafe,
                 userVisibleContext = capabilityRequest.userVisibleContext,
+                parameters = capabilityRequest.parameters,
                 targetBindingRef = targetBindingRef,
                 requestSource = requestSource,
                 policyVersion = policy.policyVersion,

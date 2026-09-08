@@ -1,6 +1,8 @@
 package com.android.everytalk.data.agent
 
 import com.android.everytalk.data.computer.ComputerCredentialStore
+import com.android.everytalk.data.computer.ComputerRepository
+import com.android.everytalk.data.computer.ComputerWorkspaceSecretManager
 
 /** Adapter 履行结果。UNKNOWN 永远不会被解释成 NOT_DELIVERED。 */
 enum class AdapterDeliveryFact { DELIVERED, NOT_DELIVERED, UNKNOWN }
@@ -88,6 +90,45 @@ class StoredAuthorizationCapabilityAdapter(
         secret.fill('\u0000')
         return true
     }
+}
+
+/** 将一次性输入保存为 Workspace Secret；Secret 正文不进入 Agent 结果。 */
+class WorkspaceSecretCapabilityAdapter(
+    private val secrets: ComputerWorkspaceSecretManager,
+    private val repository: ComputerRepository,
+) : AgentInterventionAdapter {
+    override suspend fun validate(request: TrustedInterventionRequest): Boolean =
+        request.resolutionMaterialKind == ResolutionMaterialKind.EPHEMERAL &&
+            request.targetBindingRef.contains(":workspace:")
+
+    override suspend fun present(request: TrustedInterventionRequest): String = "提供服务器环境变量 Secret"
+
+    override suspend fun fulfill(
+        request: TrustedInterventionRequest,
+        protectedResolution: ProtectedResolution,
+    ): AdapterFulfillmentResult {
+        val material = protectedResolution as? ProtectedResolution.Ephemeral
+            ?: return AdapterFulfillmentResult(AdapterDeliveryFact.NOT_DELIVERED)
+        val workspaceId = request.targetBindingRef.substringAfter(":workspace:").substringBefore(":")
+        val name = request.parameters["name"]?.takeIf { it.isNotBlank() }
+            ?: return AdapterFulfillmentResult(AdapterDeliveryFact.NOT_DELIVERED, "缺少 Secret 名称")
+        return try {
+            secrets.save(workspaceId, name, material.borrow())
+            val path = request.parameters["path"]
+                ?: return AdapterFulfillmentResult(AdapterDeliveryFact.NOT_DELIVERED, "缺少 .env 路径")
+            repository.writeWorkspaceSecretToEnv(workspaceId, name, path)
+            AdapterFulfillmentResult(AdapterDeliveryFact.DELIVERED, "Secret 已保存到当前 Workspace")
+        } catch (error: Throwable) {
+            AdapterFulfillmentResult(AdapterDeliveryFact.NOT_DELIVERED, error.message ?: "Secret 保存失败")
+        } finally {
+            material.clear()
+        }
+    }
+
+    override suspend fun reconcile(request: TrustedInterventionRequest): AdapterDeliveryFact =
+        AdapterDeliveryFact.UNKNOWN
+
+    override suspend fun cleanup(request: TrustedInterventionRequest) = Unit
 }
 
 /** Adapter 注册表只由本地代码维护，模型不能选择 Adapter。 */

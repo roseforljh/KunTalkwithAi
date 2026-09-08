@@ -90,4 +90,31 @@ class AgentControlToolsTest {
         assertEquals("git.push", request.request.requestedCapability)
         assertEquals("推送当前仓库需要认证", request.request.reasonSafe)
     }
+
+    @Test
+    fun `request_protected_secret 支持服务器环境变量且不接收 Secret 正文`() {
+        val request = agentPauseRequest(
+            AgentContentBlock.ToolCall(
+                "call-protected",
+                AgentControlToolNames.REQUEST_PROTECTED_SECRET,
+                buildJsonObject {
+                    put("scope", "SERVER_ENV")
+                    put("target_id", "computer-1")
+                    put("name", "DEFUDDLE_SERVER_KEY")
+                    put("path", "/root/defuddle-server/.env")
+                    put("reason", "写入服务器受保护环境变量")
+                },
+            ),
+        ) as AgentPauseRequest.ProtectedSecret
+
+        assertEquals(SecretScope.SERVER_ENV, request.scope)
+        assertEquals("computer-1", request.targetId)
+        assertEquals("DEFUDDLE_SERVER_KEY", request.name)
+    }
+
+    @Test
+    fun `普通文本索要密钥会被兜底识别`() {
+        assert(kotlin.run { SecretRequestGuard.isPlainTextSecretRequest("请把 API Key 直接发给我") })
+        assert(!SecretRequestGuard.isPlainTextSecretRequest("我会通过安全输入框申请密钥"))
+    }
 }

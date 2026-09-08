@@ -1122,6 +1122,15 @@ class AgentLoop(
         }
 
         blocks.reconcileFinalText(finalText)
+        // 模型绕过 request_protected_secret 时，不允许把普通索要凭据的文本持久化到聊天记录。
+        val assistantText = blocks.filterIsInstance<AgentContentBlock.Text>().joinToString("\n") { it.text }
+        if (toolCalls.isEmpty() && SecretRequestGuard.isPlainTextSecretRequest(assistantText)) {
+            blocks.removeAll { it is AgentContentBlock.Text }
+            blocks += AgentContentBlock.Text(
+                "我不能通过普通聊天接收 Key、Token、密码或其他 Secret。请让我调用安全 Secret 输入工具，由应用专用输入框接收。",
+                sourceProtocol = turnSourceProtocol,
+            )
+        }
         roundContentBuffer.finish(hasToolCalls = toolCalls.isNotEmpty())
         val assistant = AgentAssistantTurn(blocks = blocks, finishReason = finishReason)
         val finishedAt = System.currentTimeMillis()
@@ -1328,7 +1337,22 @@ class AgentLoop(
             val agentRequest = pauseRequest.getOrNull()
             if (agentRequest != null) {
                 flushParallelCalls()
-                if (agentRequest is AgentPauseRequest.Capability) {
+                if (agentRequest is AgentPauseRequest.ProtectedSecret &&
+                    agentRequest.targetId != null &&
+                    contextualComputerContext?.let { context ->
+                        agentRequest.targetId != context.computerId && agentRequest.targetId != context.workspaceId
+                    } != false
+                ) {
+                    val result = AgentContentBlock.ToolResult(
+                        toolCallId = call.id,
+                        toolName = call.name,
+                        content = kotlinx.serialization.json.JsonPrimitive("Secret 目标与当前服务器或 Workspace 不匹配"),
+                        isError = true,
+                    )
+                    persistResult(result)
+                    continue
+                }
+                if (agentRequest is AgentPauseRequest.Capability || agentRequest is AgentPauseRequest.ProtectedSecret) {
                     val broker = interventionBroker
                     if (broker == null) {
                         val result = AgentContentBlock.ToolResult(
@@ -1340,12 +1364,27 @@ class AgentLoop(
                         persistResult(result)
                         continue
                     }
+                    val capabilityRequest = when (agentRequest) {
+                        is AgentPauseRequest.Capability -> agentRequest.request
+                        is AgentPauseRequest.ProtectedSecret -> CapabilityRequest(
+                            requestedCapability = "server.env.secret",
+                            reasonSafe = agentRequest.reason,
+                            userVisibleContext = "目标服务器的受保护环境变量",
+                            parameters = mapOf(
+                                "scope" to agentRequest.scope.name,
+                                "name" to agentRequest.name,
+                                "path" to agentRequest.path.orEmpty(),
+                                "target_id" to agentRequest.targetId.orEmpty(),
+                            ),
+                        )
+                        else -> error("不可达的 Agent capability 请求")
+                    }
                     val requestHash = java.security.MessageDigest.getInstance("SHA-256")
                         .digest("${call.name}|${call.arguments}".toByteArray(Charsets.UTF_8))
                         .joinToString("") { "%02x".format(it) }
                     val ticket = broker.suspend(
                         run = run,
-                        capabilityRequest = agentRequest.request,
+                        capabilityRequest = capabilityRequest,
                         turnId = requestId,
                         requestId = requestId,
                         toolCallId = call.id,
