@@ -84,7 +84,6 @@ import com.android.everytalk.data.network.GeminiDirectClient
 import com.android.everytalk.data.network.ExternalWebSearchProvider
 import com.android.everytalk.data.network.ExternalWebSearchProviderConfig
 import com.android.everytalk.data.network.ExternalWebSearchService
-import com.android.everytalk.data.network.JinaSearchService
 import com.android.everytalk.data.network.OpenAIDirectClient
 import com.android.everytalk.data.network.OpenAIResponsesClient
 import com.android.everytalk.data.network.WebSearchSupport
@@ -100,6 +99,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import java.util.Calendar
 import java.text.SimpleDateFormat
@@ -196,8 +196,8 @@ internal suspend fun executeSharedToolCall(
         val result = localWebFetchExecutor(arguments)
         val resultObj = result as? JsonObject
         val isSuccess = resultObj?.get("ok")?.jsonPrimitive?.booleanOrNull == true
-        if (!isSuccess && mcpWebFetchFallback != null) {
-            Log.d("ToolCall", "Jina Reader 失败，尝试 MCP webfetch fallback")
+        if (!isSuccess && shouldFallbackToMcp(resultObj) && mcpWebFetchFallback != null) {
+            Log.d("ToolCall", "WebFetch 抓取失败，尝试 MCP webfetch fallback")
             updateStatus(buildToolStatus("MCP读取网页", url))
             val mcpResult = mcpWebFetchFallback(arguments)
             updateStatus(null)
@@ -271,6 +271,18 @@ internal suspend fun executeSharedToolCall(
     } finally {
         updateStatus(null)
     }
+}
+
+/** 仅对可能通过浏览器渲染或临时网络条件解决的失败启用 MCP fallback。 */
+private fun shouldFallbackToMcp(result: JsonObject?): Boolean {
+    if (result == null) return true
+    val statusCode = result["statusCode"]?.jsonPrimitive?.intOrNull
+    if (statusCode == 401) return false
+    val error = result["error"]?.jsonPrimitive?.contentOrNull.orEmpty()
+    return !error.contains("URL 无效") &&
+        !error.contains("未配置 WEBFETCH_BASE_URL") &&
+        !error.contains("未配置 WEBFETCH_API_KEY") &&
+        !error.contains("WEBFETCH_BASE_URL")
 }
 
 internal fun resolveHistoryIndexAfterSave(

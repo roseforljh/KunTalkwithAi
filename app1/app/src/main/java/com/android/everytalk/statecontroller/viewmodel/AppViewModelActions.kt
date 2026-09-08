@@ -101,7 +101,6 @@ import com.android.everytalk.data.network.AttachmentToolExecutor
 import com.android.everytalk.data.network.ExternalWebSearchProvider
 import com.android.everytalk.data.network.ExternalWebSearchProviderConfig
 import com.android.everytalk.data.network.ExternalWebSearchService
-import com.android.everytalk.data.network.JinaSearchService
 import com.android.everytalk.data.network.OpenAIDirectClient
 import com.android.everytalk.data.network.OpenAIResponsesClient
 import com.android.everytalk.data.network.WebSearchSupport
@@ -148,33 +147,6 @@ import java.util.TimeZone
         if (provider != null && apiKey.isNotBlank()) {
             return { query ->
                 val result = ExternalWebSearchService.search(provider, apiKey, query)
-                result.fold(
-                    onSuccess = { response ->
-                        buildJsonObject {
-                            put("ok", JsonPrimitive(true))
-                            put("results", kotlinx.serialization.json.JsonArray(
-                                response.results.map { r ->
-                                    buildJsonObject {
-                                        put("title", JsonPrimitive(r.title))
-                                        put("url", JsonPrimitive(r.href))
-                                        put("snippet", JsonPrimitive(r.snippet))
-                                    }
-                                }
-                            ))
-                        }
-                    },
-                    onFailure = { e ->
-                        buildJsonObject {
-                            put("ok", JsonPrimitive(false))
-                            put("error", JsonPrimitive(e.message ?: "搜索失败"))
-                        }
-                    }
-                )
-            }
-        }
-        if (JinaSearchService.isAvailable) {
-            return { query ->
-                val result = JinaSearchService.search(query)
                 result.fold(
                     onSuccess = { response ->
                         buildJsonObject {
@@ -442,7 +414,7 @@ import java.util.TimeZone
         if (!isImageGeneration && stateHolder._isWebSearchEnabled.value) {
             val currentConfig = stateHolder._selectedApiConfig.value
             val supportsNative = com.android.everytalk.data.network.WebSearchSupport.supportsNativeWebSearch(currentConfig)
-            if (!supportsNative && !canUseSelectedExternalWebSearchProvider() && !com.android.everytalk.data.network.WebSearchSupport.canUseJinaSearch()) {
+            if (!supportsNative && !canUseSelectedExternalWebSearchProvider()) {
                 showSnackbar("请先在设置-联网搜索中配置并勾选一个搜索服务商")
                 return
             }

@@ -592,8 +592,8 @@ class ApiHandler(
             }
         }
         _pendingSkillSecretApprovals.value = pending.mapNotNull { (run, record) ->
-            (record.agentRequest as? AgentPauseRequest.SkillSecret)?.let { request ->
-                PendingSkillSecretApproval(
+            when (val request = record.agentRequest) {
+                is AgentPauseRequest.SkillSecret -> PendingSkillSecretApproval(
                     runId = run.id,
                     approvalRequestId = record.approvalRequestId,
                     conversationId = run.sessionId,
@@ -601,6 +601,30 @@ class ApiHandler(
                     skillName = skillRepository.get(request.skillId)?.name ?: request.skillId,
                     name = request.name,
                     reason = request.reason,
+                )
+                is AgentPauseRequest.ProtectedSecret -> PendingSkillSecretApproval(
+                    runId = run.id,
+                    approvalRequestId = record.approvalRequestId,
+                    conversationId = run.sessionId,
+                    skillId = request.targetId ?: "protected-secret",
+                    skillName = request.scope.name,
+                    name = request.name,
+                    reason = request.reason,
+                    scope = request.scope,
+                    targetId = request.targetId,
+                )
+                else -> null
+            }?.let { request ->
+                PendingSkillSecretApproval(
+                    runId = request.runId,
+                    approvalRequestId = request.approvalRequestId,
+                    conversationId = request.conversationId,
+                    skillId = request.skillId,
+                    skillName = request.skillName,
+                    name = request.name,
+                    reason = request.reason,
+                    scope = request.scope,
+                    targetId = request.targetId,
                 )
             }
         }
@@ -687,7 +711,9 @@ class ApiHandler(
                 return@launch
             }
             try {
-                if (remember) skillSecretStore.save(current.skillId, current.name, value)
+                if (remember && current.scope == com.android.everytalk.data.agent.SecretScope.SKILL) {
+                    skillSecretStore.save(current.skillId, current.name, value)
+                }
                 com.android.everytalk.data.skill.SkillSecretSessionStore.put(runId, current.name, value)
             } finally {
                 value.fill('\u0000')

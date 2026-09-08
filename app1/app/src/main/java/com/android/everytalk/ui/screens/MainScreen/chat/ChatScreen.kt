@@ -113,8 +113,7 @@ fun ChatScreen(
     val canUseWebSearch by remember(selectedApiConfig, selectedExternalWebSearchProviderId) {
         derivedStateOf {
             supportsNativeWebSearch ||
-                viewModel.canUseSelectedExternalWebSearchProvider() ||
-                com.android.everytalk.data.network.WebSearchSupport.canUseJinaSearch()
+                viewModel.canUseSelectedExternalWebSearchProvider()
         }
     }
     val selectedMediaItems = viewModel.selectedMediaItems

@@ -1689,11 +1689,18 @@ fun ChatInputArea(
             containerColor = dialogBg,
             titleContentColor = dialogContent,
             textContentColor = dialogContent,
-            title = { Text("提供 Skill 密钥？", fontWeight = FontWeight.Bold) },
+            title = {
+                Text(
+                    if (request.scope == com.android.everytalk.data.agent.SecretScope.SKILL) "提供 Skill 密钥？"
+                    else "提供受保护 Secret？",
+                    fontWeight = FontWeight.Bold,
+                )
+            },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(
-                        "${request.skillName} 申请 ${request.name}",
+                        "${request.skillName} 申请 ${request.name}" +
+                            (request.targetId?.let { "（目标：$it）" } ?: ""),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.Medium,
                         color = dialogContent,
@@ -1730,7 +1737,8 @@ fun ChatInputArea(
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            "记住此密钥",
+                            if (request.scope == com.android.everytalk.data.agent.SecretScope.SKILL) "记住此密钥"
+                            else "仅本次任务使用",
                             style = MaterialTheme.typography.bodyMedium,
                             color = dialogContent,
                         )

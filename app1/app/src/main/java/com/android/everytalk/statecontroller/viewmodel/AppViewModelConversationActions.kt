@@ -84,7 +84,6 @@ import com.android.everytalk.data.network.GeminiDirectClient
 import com.android.everytalk.data.network.ExternalWebSearchProvider
 import com.android.everytalk.data.network.ExternalWebSearchProviderConfig
 import com.android.everytalk.data.network.ExternalWebSearchService
-import com.android.everytalk.data.network.JinaSearchService
 import com.android.everytalk.data.network.OpenAIDirectClient
 import com.android.everytalk.data.network.OpenAIResponsesClient
 import com.android.everytalk.data.network.WebSearchSupport

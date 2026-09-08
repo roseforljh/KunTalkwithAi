@@ -663,7 +663,7 @@ internal fun MessageSender.sendMessageInternal(
                 val shouldEnableGoogleSearch = isGeminiChannel && webSearchRouting.useNativeWebSearch
                 val mcpHasSearchTool = mcpToolsForRequest.any { classifyMcpTool(it).isSearchLike }
                 val shouldInjectWebSearchTool = !shouldEnableGoogleSearch && !mcpHasSearchTool
-                        && (webSearchRouting.externalProvider != null || webSearchRouting.useJinaSearch)
+                        && webSearchRouting.externalProvider != null
 
                 val existingSystemMessageIndex = apiMessagesForBackend.indexOfFirst { it.role == "system" }
                 val existingSystemPrompt = existingSystemMessageIndex.takeIf { it >= 0 }

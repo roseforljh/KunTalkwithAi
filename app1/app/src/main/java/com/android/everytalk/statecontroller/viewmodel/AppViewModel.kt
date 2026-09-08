@@ -96,7 +96,6 @@ import com.android.everytalk.data.network.AppToolExecutionResult
 import com.android.everytalk.data.network.ExternalWebSearchProvider
 import com.android.everytalk.data.network.ExternalWebSearchProviderConfig
 import com.android.everytalk.data.network.ExternalWebSearchService
-import com.android.everytalk.data.network.JinaSearchService
 import com.android.everytalk.data.network.WebSearchSupport
 import com.android.everytalk.data.network.WebFetchToolExecutor
 import com.android.everytalk.util.storage.readAtMost
