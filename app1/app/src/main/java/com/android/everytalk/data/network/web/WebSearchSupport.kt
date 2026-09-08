@@ -7,7 +7,6 @@ object WebSearchSupport {
     data class WebSearchRouting(
         val useNativeWebSearch: Boolean,
         val externalProvider: ExternalWebSearchProvider? = null,
-        val useJinaSearch: Boolean = false,
     )
 
     fun supportsNativeWebSearch(config: ApiConfig?): Boolean {
@@ -40,8 +39,6 @@ object WebSearchSupport {
         return isWebSearchEnabled && isQwenNativeSearch(config)
     }
 
-    fun canUseJinaSearch(): Boolean = JinaSearchService.isAvailable
-
     fun resolveWebSearchRouting(
         config: ApiConfig?,
         isWebSearchEnabled: Boolean,
@@ -58,12 +55,6 @@ object WebSearchSupport {
             return WebSearchRouting(
                 useNativeWebSearch = false,
                 externalProvider = selectedExternalProvider,
-            )
-        }
-        if (canUseJinaSearch()) {
-            return WebSearchRouting(
-                useNativeWebSearch = false,
-                useJinaSearch = true,
             )
         }
         return WebSearchRouting(useNativeWebSearch = false)

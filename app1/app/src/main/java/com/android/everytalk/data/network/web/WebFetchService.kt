@@ -17,18 +17,19 @@ import com.android.everytalk.util.text.TextSanitizer
 
 object WebFetchService {
     private const val TAG = "WebFetchService"
-    private const val JINA_TIMEOUT_MS = 30_000L
+    private const val FETCH_TIMEOUT_MS = 30_000L
     private const val DEFAULT_MAX_CONTENT_CHARS = 24_000
     private const val MAX_FETCH_RESPONSE_BYTES = 1L * 1024L * 1024L
 
-    private val readerBaseUrl: String = BuildConfig.JINA_READER_BASE_URL.trimEnd('/')
+    private val webFetchBaseUrl: String = BuildConfig.WEBFETCH_BASE_URL.trimEnd('/')
+    private val webFetchApiKey: String = BuildConfig.WEBFETCH_API_KEY.trim()
 
-    private val jinaClient by lazy {
+    private val httpClient by lazy {
         HttpClient(OkHttp) {
             install(HttpTimeout) {
-                requestTimeoutMillis = JINA_TIMEOUT_MS
-                connectTimeoutMillis = JINA_TIMEOUT_MS
-                socketTimeoutMillis = JINA_TIMEOUT_MS
+                requestTimeoutMillis = FETCH_TIMEOUT_MS
+                connectTimeoutMillis = FETCH_TIMEOUT_MS
+                socketTimeoutMillis = FETCH_TIMEOUT_MS
             }
             install(HttpRedirect)
         }
@@ -38,11 +39,18 @@ object WebFetchService {
         url: String,
         maxContentChars: Int = DEFAULT_MAX_CONTENT_CHARS,
     ): WebFetchResult = withContext(Dispatchers.IO) {
-        if (readerBaseUrl.isBlank()) {
+        if (webFetchBaseUrl.isBlank()) {
             return@withContext WebFetchResult(
                 success = false,
                 requestedUrl = url,
-                error = "未配置 JINA_READER_BASE_URL",
+                error = "未配置 WEBFETCH_BASE_URL",
+            )
+        }
+        if (webFetchApiKey.isBlank()) {
+            return@withContext WebFetchResult(
+                success = false,
+                requestedUrl = url,
+                error = "未配置 WEBFETCH_API_KEY",
             )
         }
 
@@ -62,21 +70,22 @@ object WebFetchService {
         maxContentChars: Int,
     ): WebFetchResult {
         return try {
-            val fetchUrl = "$readerBaseUrl/$url"
-            Log.d(TAG, "通过 Reader API 抓取: $fetchUrl")
+            val fetchUrl = "$webFetchBaseUrl/$url"
+            Log.d(TAG, "WebFetch 抓取: ${java.net.URI(url).host}")
 
-            jinaClient.prepareGet(fetchUrl) {
+            httpClient.prepareGet(fetchUrl) {
                 header(HttpHeaders.Accept, "text/markdown")
                 header("X-Return-Format", "markdown")
                 header("X-No-Cache", "true")
+                header(HttpHeaders.Authorization, "Bearer $webFetchApiKey")
             }.execute { response ->
                 if (!response.status.isSuccess()) {
-                    Log.w(TAG, "Reader API 返回非成功状态: ${response.status.value}")
+                    Log.w(TAG, "WebFetch 返回非成功状态: ${response.status.value}")
                     return@execute WebFetchResult(
                         success = false,
                         requestedUrl = url,
                         statusCode = response.status.value,
-                        error = "Reader API 返回 HTTP ${response.status.value}",
+                        error = "WebFetch 返回 HTTP ${response.status.value}",
                     )
                 }
 
@@ -87,7 +96,7 @@ object WebFetchService {
                     return@execute WebFetchResult(
                         success = false,
                         requestedUrl = url,
-                        error = "Reader API 返回空内容",
+                        error = "WebFetch 返回空内容",
                     )
                 }
 
@@ -108,11 +117,11 @@ object WebFetchService {
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Log.w(TAG, "Reader API 请求异常", e)
+            Log.w(TAG, "WebFetch 请求异常", e)
             WebFetchResult(
                 success = false,
                 requestedUrl = url,
-                error = "Reader API 请求失败: ${e.message ?: "未知错误"}",
+                error = "WebFetch 请求失败: ${e.message ?: "未知错误"}",
             )
         }
     }

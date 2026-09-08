@@ -173,8 +173,8 @@ android {
             buildConfigField("String", "SEEDREAM_API_URL", "\"${getConfigValue("SEEDREAM_API_URL")}\"")
             buildConfigField("String", "GOOGLE_SEARCH_API_KEY", "\"${getConfigValue("GOOGLE_SEARCH_API_KEY")}\"")
             buildConfigField("String", "ZHIPU_API_KEY", "\"${getConfigValue("ZHIPU_API_KEY")}\"")
-            buildConfigField("String", "JINA_READER_BASE_URL", "\"${getConfigValue("JINA_READER_BASE_URL")}\"")
-            buildConfigField("String", "JINA_SEARCH_BASE_URL", "\"${getConfigValue("JINA_SEARCH_BASE_URL")}\"")
+            buildConfigField("String", "WEBFETCH_BASE_URL", "\"${getConfigValue("WEBFETCH_BASE_URL")}\"")
+            buildConfigField("String", "WEBFETCH_API_KEY", "\"${getConfigValue("WEBFETCH_API_KEY")}\"")
             buildConfigField("String", "AI_CONTENT_REPORT_URL", "\"${getConfigValue("AI_CONTENT_REPORT_URL")}\"")
         }
         debug {
@@ -195,8 +195,8 @@ android {
             buildConfigField("String", "SEEDREAM_API_URL", "\"${getConfigValue("SEEDREAM_API_URL")}\"")
             buildConfigField("String", "GOOGLE_SEARCH_API_KEY", "\"${getConfigValue("GOOGLE_SEARCH_API_KEY")}\"")
             buildConfigField("String", "ZHIPU_API_KEY", "\"${getConfigValue("ZHIPU_API_KEY")}\"")
-            buildConfigField("String", "JINA_READER_BASE_URL", "\"${getConfigValue("JINA_READER_BASE_URL")}\"")
-            buildConfigField("String", "JINA_SEARCH_BASE_URL", "\"${getConfigValue("JINA_SEARCH_BASE_URL")}\"")
+            buildConfigField("String", "WEBFETCH_BASE_URL", "\"${getConfigValue("WEBFETCH_BASE_URL")}\"")
+            buildConfigField("String", "WEBFETCH_API_KEY", "\"${getConfigValue("WEBFETCH_API_KEY")}\"")
             buildConfigField("String", "AI_CONTENT_REPORT_URL", "\"${getConfigValue("AI_CONTENT_REPORT_URL")}\"")
 
             applicationIdSuffix = ".debug"
