@@ -18,6 +18,7 @@ import com.android.everytalk.data.computer.ComputerPreview
 import com.android.everytalk.data.computer.ComputerPreviewStatus
 import com.android.everytalk.data.computer.ComputerPreviewVisibility
 import com.android.everytalk.data.computer.ComputerPermissionMode
+import com.android.everytalk.data.computer.ComputerProvider
 import com.android.everytalk.data.computer.ComputerRunMode
 import com.android.everytalk.data.computer.ComputerRemoteStatus
 import com.android.everytalk.data.computer.ComputerStatus
@@ -32,6 +33,8 @@ import kotlinx.serialization.json.Json
 data class ComputerEntity(
     @PrimaryKey val id: String,
     val displayName: String,
+    @ColumnInfo(defaultValue = "'SSH'") val provider: String = ComputerProvider.SSH.name,
+    val providerConfigRef: String? = null,
     val host: String,
     val port: Int,
     val username: String,
@@ -244,6 +247,8 @@ data class ComputerAuditEventEntity(
 fun ComputerEntity.toModel(json: Json): Computer = Computer(
     id = id,
     displayName = displayName,
+    provider = enumValueOrDefault(provider, ComputerProvider.SSH),
+    providerConfigRef = providerConfigRef,
     host = host,
     port = port,
     username = username,
@@ -271,6 +276,8 @@ fun ComputerEntity.toModel(json: Json): Computer = Computer(
 fun Computer.toEntity(json: Json): ComputerEntity = ComputerEntity(
     id = id,
     displayName = displayName,
+    provider = provider.name,
+    providerConfigRef = providerConfigRef,
     host = host,
     port = port,
     username = username,

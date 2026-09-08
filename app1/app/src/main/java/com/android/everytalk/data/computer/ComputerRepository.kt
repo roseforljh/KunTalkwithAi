@@ -94,6 +94,48 @@ class ComputerRepository(
     suspend fun getWorkspaces(computerId: String): List<ComputerWorkspace> =
         dao.getWorkspacesForComputer(computerId).map { it.toModel() }
 
+    /**
+     * 使用本地加密 Workspace Secret 更新远端 .env。
+     * Secret 只作为 SSH stdin 传输，命令行、Room、Execution 摘要和返回值都不包含 Secret。
+     */
+    internal suspend fun writeWorkspaceSecretToEnv(
+        workspaceId: String,
+        name: String,
+        path: String,
+    ): Boolean {
+        val workspace = getWorkspace(workspaceId)
+            ?: throw ComputerException(ComputerErrorCodes.WORKSPACE_NOT_READY, "Workspace 不存在")
+        if (workspace.runMode != ComputerRunMode.DIRECT) {
+            throw ComputerException(ComputerErrorCodes.COMPUTER_NOT_READY, "仅 Direct SSH 模式支持服务器 .env")
+        }
+        val secret = credentialStore.loadWorkspaceSecret(
+            dao.getWorkspaceSecret(workspaceId, name)?.id
+                ?: throw ComputerException(ComputerErrorCodes.CREDENTIAL_MISSING, "Workspace Secret 不存在"),
+        )
+        return try {
+            val command = ComputerSecretEnvWriter.buildUpsertCommand(path, name)
+            val secretBytes = secret.concatToString().toByteArray(Charsets.UTF_8)
+            try {
+                val result = withConnection(workspace.computerId) { connection, _ ->
+                    connection.execute(
+                        command = command,
+                        stdin = secretBytes,
+                        timeoutMillis = 30_000,
+                        maxOutputBytes = 8 * 1024,
+                    )
+                }
+                if (result.timedOut || result.exitCode != 0) {
+                    throw ComputerException(ComputerErrorCodes.EXECUTION_UNKNOWN, "服务器 .env 更新失败", retryable = true)
+                }
+            } finally {
+                secretBytes.fill(0)
+            }
+            true
+        } finally {
+            secret.fill('\u0000')
+        }
+    }
+
     suspend fun getSelectedComputer(conversationId: String): Computer? {
         val computerId = dao.getSelectedComputerId(conversationId) ?: return null
         return getComputer(computerId)

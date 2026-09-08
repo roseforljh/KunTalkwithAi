@@ -191,6 +191,10 @@ data class ComputerCapabilities(
 data class Computer(
     val id: String,
     val displayName: String,
+    /** 执行目标的提供方。旧数据缺少该字段时由 Room/转换层默认为 SSH。 */
+    val provider: ComputerProvider = ComputerProvider.SSH,
+    /** Provider 的非敏感配置引用；Cloudflare 账号配置单独保存。 */
+    val providerConfigRef: String? = null,
     val host: String,
     val port: Int,
     val username: String,

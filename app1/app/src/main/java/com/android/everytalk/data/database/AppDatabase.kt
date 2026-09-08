@@ -88,7 +88,7 @@ import com.android.everytalk.data.database.entities.WorkspaceSecretMetadataEntit
         AgentStoredAuthorizationEntity::class,
         AgentOAuthStateEntity::class,
     ],
-    version = 33,
+    version = 34,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -148,6 +148,7 @@ abstract class AppDatabase : RoomDatabase() {
                     MIGRATION_30_31,
                     MIGRATION_31_32,
                     MIGRATION_32_33,
+                    MIGRATION_33_34,
                 )
                 .addCallback(DATABASE_MAINTENANCE_CALLBACK)
                 .build()
@@ -1202,6 +1203,14 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("ALTER TABLE agent_suspensions ADD COLUMN reasonSafe TEXT NOT NULL DEFAULT ''")
                 db.execSQL("ALTER TABLE agent_suspensions ADD COLUMN userVisibleContext TEXT")
                 db.execSQL("ALTER TABLE agent_suspensions ADD COLUMN resolutionReference TEXT")
+            }
+        }
+
+        /** Provider 扩展：旧 Computer 全部保持 SSH 语义。 */
+        val MIGRATION_33_34 = object : Migration(33, 34) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE computers ADD COLUMN provider TEXT NOT NULL DEFAULT 'SSH'")
+                db.execSQL("ALTER TABLE computers ADD COLUMN providerConfigRef TEXT")
             }
         }
 
