@@ -21,7 +21,7 @@ import org.intellij.markdown.MarkdownElementTypes
 import org.intellij.markdown.ast.ASTNode
 import org.intellij.markdown.flavours.gfm.GFMTokenTypes
 
-private const val EXTERNAL_LINK_SUFFIX = "\u00a0↗"
+internal const val EXTERNAL_LINK_SUFFIX = "↗"
 
 internal fun isExternalMarkdownLink(url: String): Boolean =
     url.startsWith("https://", ignoreCase = true) || url.startsWith("http://", ignoreCase = true)
@@ -35,11 +35,12 @@ internal fun AnnotatedString.Builder.appendStyledMarkdownLink(
     node: ASTNode,
     settings: AnnotatorSettings,
 ): Boolean {
-    if (node.type !in listOf(
-            MarkdownElementTypes.INLINE_LINK, MarkdownElementTypes.AUTOLINK,
-            GFMTokenTypes.GFM_AUTOLINK, MarkdownElementTypes.SHORT_REFERENCE_LINK,
-            MarkdownElementTypes.FULL_REFERENCE_LINK,
-        )) return false
+    when (node.type) {
+        MarkdownElementTypes.INLINE_LINK, MarkdownElementTypes.AUTOLINK,
+        GFMTokenTypes.GFM_AUTOLINK, MarkdownElementTypes.SHORT_REFERENCE_LINK,
+        MarkdownElementTypes.FULL_REFERENCE_LINK -> Unit
+        else -> return false
+    }
     // GFM 可能在行内代码下仍生成自动链接节点；这里只输出原字面文本。
     if (node.hasMarkdownLinkLogoExcludedAncestor()) {
         append(node.getUnescapedTextInNode(content))
@@ -64,15 +65,15 @@ internal fun AnnotatedString.Builder.appendStyledMarkdownLink(
 
 /**
  * 布局完成后计算可见链接每一行的范围，绘制时只画圆点，不重新解析或测量正文。
- * 使用文本范围的路径处理自动换行与文字方向，排除末尾箭头和未显示的行。
+ * 选区路径在换行处会覆盖行尾空白，不能作为点线范围。
+ * 改为合并每行可见字符的边界，排除行首尾空白、箭头和省略部分；双向文字分开绘制。
  */
 internal fun markdownLinkUnderlineBounds(layout: TextLayoutResult): List<Rect> = buildList {
     val text = layout.layoutInput.text
     text.getLinkAnnotations(0, text.length).forEach { range ->
         val link = range.item as? LinkAnnotation.Url ?: return@forEach
         if (!isExternalMarkdownLink(link.url)) return@forEach
-        val fullLabel = text.text.substring(range.start, range.end)
-        val end = if (fullLabel.endsWith(EXTERNAL_LINK_SUFFIX)) {
+        val end = if (text.text.regionMatches(range.end - EXTERNAL_LINK_SUFFIX.length, EXTERNAL_LINK_SUFFIX, 0, EXTERNAL_LINK_SUFFIX.length)) {
             range.end - EXTERNAL_LINK_SUFFIX.length
         } else {
             range.end
@@ -82,11 +83,30 @@ internal fun markdownLinkUnderlineBounds(layout: TextLayoutResult): List<Rect> =
         val lastLine = layout.getLineForOffset(end - 1)
         for (line in firstLine..lastLine) {
             if (line >= layout.lineCount || layout.getLineTop(line) >= layout.size.height) break
-            val start = maxOf(range.start, layout.getLineStart(line))
-            val lineEnd = minOf(end, layout.getLineEnd(line, visibleEnd = true))
+            var start = maxOf(range.start, layout.getLineStart(line))
+            var lineEnd = minOf(end, layout.getLineEnd(line, visibleEnd = true))
+            while (start < lineEnd && text[start].isWhitespace()) start++
+            while (lineEnd > start && text[lineEnd - 1].isWhitespace()) lineEnd--
             if (start < lineEnd) {
-                val bounds = layout.getPathForRange(start, lineEnd).getBounds()
-                add(Rect(bounds.left, layout.getLineBaseline(line), bounds.right, layout.getLineBottom(line)))
+                val boxes = (start until lineEnd).map { layout.getBoundingBox(it) }
+                    .filter { it.width > 0f }.sortedBy { it.left }
+                var left = 0f
+                var right = 0f
+                boxes.forEachIndexed { index, box ->
+                    if (index == 0 || box.left > right + 0.5f) {
+                        if (index > 0) {
+                            val glyphBottom = boxes[index - 1].bottom
+                            add(Rect(left, layout.getLineBaseline(line), right, glyphBottom))
+                        }
+                        left = box.left
+                        right = box.right
+                    } else right = maxOf(right, box.right)
+                }
+                if (boxes.isNotEmpty()) {
+                    // 使用实际字形的底部，而不是整行行框底部，避免中英文混排时点线漂移。
+                    val glyphBottom = boxes.maxOf { it.bottom }
+                    add(Rect(left, layout.getLineBaseline(line), right, glyphBottom))
+                }
             }
         }
     }
@@ -100,11 +120,12 @@ internal object MarkdownDottedLinkPainter : ExtendedSpanPainter() {
     override fun drawInstructionsFor(layoutResult: TextLayoutResult, color: Color?): SpanDrawInstructions {
         val bounds = markdownLinkUnderlineBounds(layoutResult)
         return SpanDrawInstructions {
-            val radius = 0.8.dp.toPx()
+            val radius = 1.dp.toPx()
             val step = 3.8.dp.toPx()
             val dotColor = (color ?: Color.Gray).copy(alpha = 0.45f)
             bounds.forEach { line ->
-                val y = minOf(line.top + 3.dp.toPx(), line.bottom - radius)
+                // 点线跟随当前行真实字形底部，并留出稳定的视觉间距。
+                val y = line.bottom + 1.5.dp.toPx()
                 var x = line.left + radius
                 while (x + radius <= line.right) {
                     drawCircle(dotColor, radius, Offset(x, y))
