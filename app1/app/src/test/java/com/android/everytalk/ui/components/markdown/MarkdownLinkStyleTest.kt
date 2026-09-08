@@ -46,7 +46,7 @@ class MarkdownLinkStyleTest {
         val rendered = "[**查看说明**](https://example.com/path) 后续正文 `code`".buildMarkdownAnnotatedString(
             style = TextStyle.Default, annotatorSettings = settings(listener),
         )
-        assertTrue(rendered.text.startsWith("查看说明\u00a0↗ 后续正文"))
+        assertTrue(rendered.text.startsWith("查看说明${EXTERNAL_LINK_SUFFIX} 后续正文"))
         val links = rendered.getLinkAnnotations(0, rendered.length)
         assertEquals(2, links.size)
         links.forEach {
@@ -54,7 +54,7 @@ class MarkdownLinkStyleTest {
             link.linkInteractionListener!!.onClick(link)
             assertEquals("https://example.com/path", opened)
         }
-        assertEquals("\u00a0↗", rendered.text.substring(links.last().start, links.last().end))
+        assertEquals(EXTERNAL_LINK_SUFFIX, rendered.text.substring(links.last().start, links.last().end))
     }
 
     @Test
@@ -89,7 +89,26 @@ class MarkdownLinkStyleTest {
         assertTrue("点线不应超出布局：$lines", lines.all { it.width > 0 && it.left >= 0 && it.right <= layout.size.width + 1 })
         val label = rendered.getLinkAnnotations(0, rendered.length).first()
         assertEquals(layout.getLineForOffset(label.end - 1) + 1, lines.size)
-        // 最后一行只验证有实际文字范围；具体像素宽度由 Compose 的字体度量决定。
-        assertTrue(lines.last().right > lines.last().left)
+        // 按字框核对每行末字，不能仅断言“不超出控件”，那会漏掉整行留白被画线的问题。
+        lines.forEachIndexed { index, bounds ->
+            var end = minOf(label.end, layout.getLineEnd(index, visibleEnd = true))
+            while (end > label.start && rendered[end - 1].isWhitespace()) end--
+            assertEquals(layout.getBoundingBox(end - 1).right, bounds.right, 0.1f)
+        }
+        assertTrue(lines.first().right < layout.size.width)
     }
+
+    @Test
+    fun `行内健康检查链接不包含后续JSON和冒号`() {
+        val rendered = "主站 https://www.imjos.com/health： `{" + "\"ok\":true}`"
+        val annotated = rendered.buildMarkdownAnnotatedString(
+            style = TextStyle.Default, annotatorSettings = settings(), flavour = EveryTalkMarkdownFlavourDescriptor,
+        )
+        val links = annotated.getLinkAnnotations(0, annotated.length)
+        assertTrue(annotated.text, links.isNotEmpty())
+        links.forEach { range ->
+            assertFalse(annotated.text.substring(range.start, range.end).contains("ok"))
+        }
+    }
+
 }

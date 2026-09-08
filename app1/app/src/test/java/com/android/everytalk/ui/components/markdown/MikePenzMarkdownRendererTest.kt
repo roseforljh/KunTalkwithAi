@@ -106,7 +106,7 @@ class MikePenzMarkdownRendererTest {
             annotatorSettings = settings,
         )
 
-        assertEquals("重点 链接\u00a0↗", rendered.text)
+        assertEquals("重点 链接${EXTERNAL_LINK_SUFFIX}", rendered.text)
         assertFalse(rendered.spanStyles.any { it.item.fontWeight == FontWeight.Bold })
         assertTrue(rendered.spanStyles.any { it.item.fontWeight == FontWeight.Medium })
         assertEquals(
