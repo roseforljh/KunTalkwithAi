@@ -38,6 +38,7 @@ services/**/wrangler.jsonc
 
 # app1 子目录中忽略的内容
 app1/.gradle/
+app1/.gradle*/
 app1/build/
 app1/*/build/
 app1/local.properties
